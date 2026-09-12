@@ -12,6 +12,36 @@ Product changes are listed newest first. This file must remain synchronized with
 
 - Added `test_form_controls_have_accessible_names` in `tests/test_platform.py`, sweeping nine forms; suite passes.
 
+## 2026-09-12 — Lifecycle module in Estonian
+
+### Fixed
+
+- Localized the lifecycle module (onboarding, internal changes, separations, alumni, cases, org chart) and the attendance register headers to Estonian-first copy; canonical status vocabularies and stored severity/visibility values stay English. Form selects and date inputs gained accessible labels.
+
+### Verification
+
+- Added `test_lifecycle_pages_render_estonian_copy` in `tests/test_platform.py`; suite passes.
+
+## 2026-09-12 — Travel page in Estonian
+
+### Fixed
+
+- Localized the last fully English app page: travel request titles, table headers, decision buttons, form placeholders, empty state and back link are now Estonian-first; the employee picker and date inputs gained accessible labels.
+
+### Verification
+
+- Added `test_travel_page_renders_estonian_copy` in `tests/test_expenses.py`; suite passes.
+
+## 2026-09-12 — App shell declares Estonian page language
+
+### Fixed
+
+- The authenticated app shell now renders `<html lang="et">` so screen readers and browsers use Estonian pronunciation and hyphenation on every app page; previously the auto-generated shell carried no language.
+
+### Verification
+
+- Added `test_app_shell_sets_html_lang` in `tests/test_platform.py`; suite passes.
+
 ## 2026-09-12 — Empty states for list pages
 
 ### Fixed
