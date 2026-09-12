@@ -729,3 +729,12 @@ def test_lifecycle_pages_render_estonian_copy(fresh_db):
                    "Org chart", "No changes recorded"):
         assert needle not in str(lifecycle.changes_page())
     assert "Tunnid" in str(views.attendance_view())
+
+
+def test_app_shell_sets_html_lang(fresh_db):
+    from fasthtml.common import Div
+
+    from web.layout import page
+
+    assert '<html lang="et">' in str(page("home", "", "a@b.c", None, Div("x")))
+>>>>>>> fix/audit-travel-et
