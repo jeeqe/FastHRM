@@ -713,3 +713,19 @@ def test_employee_detail_shows_empty_payslip_state(fresh_db):
                         VALUES ('Ada','Lovelace','Active',60000)""")
         eid = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
     assert "Palgalehti pole." in str(views.employee_detail(eid))
+
+
+def test_lifecycle_pages_render_estonian_copy(fresh_db):
+    from web import lifecycle
+    from web import views
+
+    assert "Sisseelamine" in str(lifecycle.onboarding_page())
+    assert "Sisemised muudatused" in str(lifecycle.changes_page())
+    assert "Lahkumised" in str(lifecycle.separations_page())
+    assert "Vilistlased" in str(lifecycle.alumni_page())
+    assert "Töösuhted" in str(lifecycle.cases_page())
+    assert "Org-struktuur" in str(lifecycle.org_page())
+    for needle in ("Onboarding", "Internal changes", "Separations", "Employee relations",
+                   "Org chart", "No changes recorded"):
+        assert needle not in str(lifecycle.changes_page())
+    assert "Tunnid" in str(views.attendance_view())
