@@ -713,3 +713,11 @@ def test_employee_detail_shows_empty_payslip_state(fresh_db):
                         VALUES ('Ada','Lovelace','Active',60000)""")
         eid = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
     assert "Palgalehti pole." in str(views.employee_detail(eid))
+
+
+def test_app_shell_sets_html_lang(fresh_db):
+    from fasthtml.common import Div
+
+    from web.layout import page
+
+    assert '<html lang="et">' in str(page("home", "", "a@b.c", None, Div("x")))
