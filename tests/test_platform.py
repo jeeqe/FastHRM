@@ -737,4 +737,3 @@ def test_app_shell_sets_html_lang(fresh_db):
     from web.layout import page
 
     assert '<html lang="et">' in str(page("home", "", "a@b.c", None, Div("x")))
->>>>>>> fix/audit-travel-et
