@@ -2,6 +2,16 @@
 
 Product changes are listed newest first. This file must remain synchronized with `docs/product_roadmap.md` under the rule documented there and in `AGENTS.md`.
 
+## 2026-09-14 — Authenticated app i18n foundation
+
+### Added
+
+- Added shared Estonian/English app-chrome copy and session-backed language resolution to the authenticated admin shell and employee portal. The active language is reflected in the document language and can be switched while preserving the current path.
+
+### Verification
+
+- Added `test_authenticated_language_persists_and_switches_on_admin_and_portal` in `tests/test_platform.py`; the full suite passed in this checkout (`149 passed, 1 skipped`).
+
 ## 2026-09-12 — Accessible names for form controls
 
 ### Fixed
