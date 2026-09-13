@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from fasthtml.common import (
     Div, H1, H3, H4, P, Span, A, Button, Details, Summary, Form, Input, Title, Link, Script, Style, NotStr,
+    Html, Head, Body,
 )
 
 LAYOUT_CSS = """
@@ -397,14 +398,17 @@ def right_pane_chat(thread_id):
 
 def page(active, env, user_email, thread_id, *content, right_override=None):
     right = right_override if right_override is not None else right_pane_chat(thread_id)
-    return (Title("FastHR"),
-            Link(rel="icon", type="image/svg+xml", href="/static/favicon.svg"),
-            Script(src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"),
-            Style(LAYOUT_CSS),
-            Div(topbar(env, user_email), left_pane(active), Div(*content, cls="center-pane"), right,
-                Button(type="button", id="app-backdrop", aria_hidden="true", tabindex="-1", onclick="closeOverlays()"),
-                Div(NotStr("&lsaquo; AI-abiline"), id="copilot-reopen", onclick="toggleCopilot()"), cls="app"),
-            Script(LAYOUT_JS))
+    return Html(Head(Title("FastHR"),
+                     Link(rel="icon", type="image/svg+xml", href="/static/favicon.svg"),
+                     Script(src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"),
+                     Style(LAYOUT_CSS)),
+                Body(Div(topbar(env, user_email), left_pane(active), Div(*content, cls="center-pane"), right,
+                         Button(type="button", id="app-backdrop", aria_hidden="true", tabindex="-1",
+                                onclick="closeOverlays()"),
+                         Div(NotStr("&lsaquo; AI-abiline"), id="copilot-reopen", onclick="toggleCopilot()"),
+                         cls="app"),
+                     Script(LAYOUT_JS)),
+                lang="et")
 
 
 def kpi_card(label, value, trend="", tone=""):

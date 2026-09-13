@@ -2,6 +2,16 @@
 
 Product changes are listed newest first. This file must remain synchronized with `docs/product_roadmap.md` under the rule documented there and in `AGENTS.md`.
 
+## 2026-09-12 — App shell declares Estonian page language
+
+### Fixed
+
+- The authenticated app shell now renders `<html lang="et">` so screen readers and browsers use Estonian pronunciation and hyphenation on every app page; previously the auto-generated shell carried no language.
+
+### Verification
+
+- Added `test_app_shell_sets_html_lang` in `tests/test_platform.py`; suite passes.
+
 ## 2026-09-12 — Empty states for list pages
 
 ### Fixed
