@@ -159,10 +159,11 @@ def _apply_form():
     return Div(Div(H3("Puhkuse taotlus"), cls="card-header"),
                Form(
                    Select(*[Option(f"{e['first_name']} {e['last_name']}", value=str(e["id"])) for e in emps],
-                          name="employee_id", cls="hr-inp"),
-                   Select(*[Option(t, value=t) for t in db.LEAVE_TYPES], name="leave_type", cls="hr-inp"),
-                   Input(type="date", name="from_date", cls="hr-inp", required=True),
-                   Input(type="date", name="to_date", cls="hr-inp", required=True),
+                          name="employee_id", cls="hr-inp", aria_label="Töötaja"),
+                   Select(*[Option(t, value=t) for t in db.LEAVE_TYPES], name="leave_type", cls="hr-inp",
+                          aria_label="Puhkuseliik"),
+                   Input(type="date", name="from_date", cls="hr-inp", required=True, aria_label="Alguskuupäev"),
+                   Input(type="date", name="to_date", cls="hr-inp", required=True, aria_label="Lõppkuupäev"),
                    Input(name="reason", placeholder="Põhjus", cls="hr-inp", style="flex:1;min-width:140px;"),
                    Button("Esita", cls="btn primary", type="submit"),
                    **{"hx-post": "/leave/apply", "hx-target": "#leave-main", "hx-swap": "innerHTML"},
@@ -211,7 +212,7 @@ def attendance_view():
     for r in reg:
         counts[r["status"]] = counts.get(r["status"], 0) + 1
     kpis = Div(*[kpi_card(s, counts.get(s, 0)) for s in db.ATTEND_STATUSES[:4]], cls="kpi-grid")
-    tbl = Table(Thead(Tr(Th("Employee"), Th("Department"), Th("Status"), Th("Hours", cls="num"))),
+    tbl = Table(Thead(Tr(Th("Töötaja"), Th("Osakond"), Th("Staatus"), Th("Tunnid", cls="num"))),
                 Tbody(*[Tr(Td(f"{r['first_name']} {r['last_name']}"), Td(r["dept"] or "Puudub"),
                            Td(_pill(r["status"])), Td(f"{r['hours']:.1f}" if r["hours"] else "Puudub", cls="num"))
                         for r in reg] or [Tr(Td("Tänaseid kohalolekuid pole.", colspan="4"))]), cls="tbl")
@@ -257,9 +258,9 @@ def shifts_roster(week=""):
                   Tbody(*rows_ or [Tr(Td("Sel nädalal vahetusi pole.", colspan="8"))]), cls="tbl")
     types = db.shift_types()
     emps = db.employees_min()
-    form = Form(Select(*[Option(_name(e), value=str(e["id"])) for e in emps], name="employee_id", required=True, cls="hr-inp"),
-                Select(*[Option(t["name"], value=str(t["id"])) for t in types], name="shift_type_id", required=True, cls="hr-inp"),
-                Input(type="date", name="shift_date", value=db.TODAY.isoformat(), required=True, cls="hr-inp"),
+    form = Form(Select(*[Option(_name(e), value=str(e["id"])) for e in emps], name="employee_id", required=True, cls="hr-inp", aria_label="Töötaja"),
+                Select(*[Option(t["name"], value=str(t["id"])) for t in types], name="shift_type_id", required=True, cls="hr-inp", aria_label="Vahetuse liik"),
+                Input(type="date", name="shift_date", value=db.TODAY.isoformat(), required=True, cls="hr-inp", aria_label="Vahetuse kuupäev"),
                 Input(name="location_label", placeholder="Asukoht, näiteks Tallinna kontor", cls="hr-inp"),
                 Button("Loo vahetus", type="submit", cls="btn primary"), method="post", action="/shifts/new")
     prev_week, next_week = (start - timedelta(days=7)).isoformat(), (start + timedelta(days=7)).isoformat()
@@ -491,7 +492,7 @@ def payslip_detail(pid):
 
 def _employee_select(name="employee_id"):
     return Select(*[Option(_name(e), value=str(e["id"])) for e in db.employees_min()],
-                  name=name, required=True, cls="hr-inp")
+                  name=name, required=True, cls="hr-inp", aria_label="Töötaja")
 
 
 def expenses_page():
@@ -512,8 +513,8 @@ def expenses_page():
                              Td(c["claim_date"]), Td(c["description"]), Td(money(c["amount"]), cls="num"),
                              Td(_pill(c["status"])), Td(*actions, cls="actions")))
     claim_form = Form(_employee_select(),
-                      Select(*[Option(cat["name"], value=str(cat["id"])) for cat in cats], name="category_id", required=True, cls="hr-inp"),
-                      Input(type="date", name="claim_date", value=db.TODAY.isoformat(), required=True, cls="hr-inp"),
+                      Select(*[Option(cat["name"], value=str(cat["id"])) for cat in cats], name="category_id", required=True, cls="hr-inp", aria_label="Kategooria"),
+                      Input(type="date", name="claim_date", value=db.TODAY.isoformat(), required=True, cls="hr-inp", aria_label="Kulu kuupäev"),
                       Input(type="number", name="amount", min="0", step="0.01", placeholder="Summa", required=True, cls="hr-inp"),
                       Input(name="description", placeholder="Mille eest kulu tekkis?", required=True, cls="hr-inp"),
                       Input(type="number", name="tax_rate", min="0", max="1", step="0.01", value="0.22", title="Maksumäär", cls="hr-inp"),
@@ -543,21 +544,22 @@ def travel_page():
     for t in requests:
         actions = []
         if t["status"] == "Submitted":
-            for label, decision in (("Approve", "Approved"), ("Reject", "Rejected"), ("Return", "Returned")):
+            for label, decision in (("Kinnita", "Approved"), ("Lükka tagasi", "Rejected"), ("Tagasta", "Returned")):
                 actions.append(Form(Button(label, type="submit", cls="btn sm"), method="post", action=f"/travel/{t['id']}/decide?decision={decision}"))
         elif t["status"] == "Returned":
-            actions.append(Form(Button("Resubmit", type="submit", cls="btn sm primary"), method="post", action=f"/travel/{t['id']}/decide?decision=Resubmit"))
+            actions.append(Form(Button("Esita uuesti", type="submit", cls="btn sm primary"), method="post", action=f"/travel/{t['id']}/decide?decision=Resubmit"))
         rows_.append(Tr(Td(f"{t['first_name']} {t['last_name']}"), Td(t["destination"]),
                         Td(f"{t['from_date']} → {t['to_date']}"), Td(t["purpose"]),
                         Td(money(t["estimated_cost"])), Td(_pill(t["status"])), Td(*actions)))
-    form = Form(_employee_select(), Input(name="destination", placeholder="Destination", required=True, cls="hr-inp"),
-                Input(name="purpose", placeholder="Purpose", required=True, cls="hr-inp"),
-                Input(type="date", name="from_date", required=True, cls="hr-inp"), Input(type="date", name="to_date", required=True, cls="hr-inp"),
-                Input(type="number", name="estimated_cost", min="0", step="0.01", placeholder="Estimated cost", required=True, cls="hr-inp"),
-                Input(type="number", name="advance_requested", min="0", step="0.01", value="0", placeholder="Advance", cls="hr-inp"),
-                Button("Submit request", type="submit", cls="btn primary"), method="post", action="/travel/new")
-    return (_title("Travel requests", "Plan and approve employee travel.", A("← Expenses", href="/expenses", cls="btn")),
-            Div(Div(H3("Travel requests"), cls="card-header"),
-                Table(Thead(Tr(Th("Employee"), Th("Destination"), Th("Dates"), Th("Purpose"), Th("Estimate"), Th("Status"), Th(""))),
-                      Tbody(*rows_ or [Tr(Td("No travel requests.", colspan="7"))]), cls="tbl"), cls="card"),
-            Div(Div(H3("New travel request"), cls="card-header"), form, cls="card"))
+    form = Form(_employee_select(), Input(name="destination", placeholder="Sihtkoht", required=True, cls="hr-inp"),
+                Input(name="purpose", placeholder="Eesmärk", required=True, cls="hr-inp"),
+                Input(type="date", name="from_date", required=True, cls="hr-inp", aria_label="Alguskuupäev"),
+                Input(type="date", name="to_date", required=True, cls="hr-inp", aria_label="Lõppkuupäev"),
+                Input(type="number", name="estimated_cost", min="0", step="0.01", placeholder="Hinnanguline maksumus", required=True, cls="hr-inp"),
+                Input(type="number", name="advance_requested", min="0", step="0.01", value="0", placeholder="Avanss", cls="hr-inp"),
+                Button("Esita taotlus", type="submit", cls="btn primary"), method="post", action="/travel/new")
+    return (_title("Lähetused", "Planeeri ja kinnita töötajate lähetusi.", A("← Kulud", href="/expenses", cls="btn")),
+            Div(Div(H3("Lähetused"), cls="card-header"),
+                Table(Thead(Tr(Th("Töötaja"), Th("Sihtkoht"), Th("Kuupäevad"), Th("Eesmärk"), Th("Hinnang"), Th("Staatus"), Th(""))),
+                      Tbody(*rows_ or [Tr(Td("Lähetusi pole.", colspan="7"))]), cls="tbl"), cls="card"),
+            Div(Div(H3("Uus lähetus"), cls="card-header"), form, cls="card"))
