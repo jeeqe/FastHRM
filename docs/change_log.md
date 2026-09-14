@@ -2,6 +2,17 @@
 
 Product changes are listed newest first. This file must remain synchronized with `docs/product_roadmap.md` under the rule documented there and in `AGENTS.md`.
 
+## 2026-09-14 — Employee self-service portal content in Estonian and English
+
+### Added
+
+- Localized all employee portal content, including navigation, home cards, pay, leave, time, expenses and travel, onboarding, forms and empty states. Canonical leave types, statuses and seed data remain unchanged.
+- Added count-aware portal copy so Estonian numerals use the correct singular nominative and plural partitive forms.
+
+### Verification
+
+- Added bilingual portal home and pay-page coverage, including the pluralization regression check; full suite verification is recorded with the pull request.
+
 ## 2026-09-14 — Dashboard and people pages in Estonian and English
 
 ### Added
