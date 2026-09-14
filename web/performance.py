@@ -396,25 +396,25 @@ def signals_page(dept="All"):
     ready = people.promotion_readiness()
 
     risk_card = Div(
-        Div(H3("Attrition signals"),
-            Small("advisory only", style="color:var(--text-mute);"), cls="card-header"),
-        P("Flags are raised from goal progress, attendance, feedback recency and tenure. "
-          "Every flag lists the factors behind it — there are no unexplained scores, and "
-          "nothing here should be acted on without a conversation.",
+        Div(H3(_c("perf_attrition")),
+            Small(_c("perf_advisory"), style="color:var(--text-mute);"), cls="card-header"),
+        P(_c("perf_signals_explanation"),
           style="color:var(--text-mute);font-size:12.5px;margin:0 0 12px;"),
-        Table(Thead(Tr(Th("Employee"), Th("Department"), Th("Signal"), Th("Why"))),
+        Table(Thead(Tr(Th(_c("perf_employee")), Th(_c("perf_department")),
+                      Th(_c("perf_signal")), Th(_c("perf_why")))),
               Tbody(*[Tr(Td(A(r["name"], href=f"/employees/{r['id']}"),
                             Div(r["designation"] or "", style="font-size:11.5px;color:var(--text-mute);")),
                          Td(r["dept"] or "—"),
                          Td(Span(r["band"], cls="pill " + ("rejected" if r["band"] == "High" else "pending"))),
                          Td(Div(*[Div("• " + f, style="font-size:12px;color:var(--text-dim);")
                                   for f in r["factors"]])))
-                      for r in risk] or [Tr(Td("No signals raised — good news.", colspan="4"))]),
+                      for r in risk] or [Tr(Td(_c("perf_no_signals"), colspan="4"))]),
               cls="tbl"), cls="card")
 
     ready_card = Div(
-        Div(H3("Promotion readiness"), cls="card-header"),
-        Table(Thead(Tr(Th("Employee"), Th("Department"), Th("Score", cls="num"), Th("Why"))),
+        Div(H3(_c("perf_readiness")), cls="card-header"),
+        Table(Thead(Tr(Th(_c("perf_employee")), Th(_c("perf_department")),
+                      Th(_c("perf_score"), cls="num"), Th(_c("perf_why")))),
               Tbody(*[Tr(Td(A(r["name"], href=f"/employees/{r['id']}")),
                          Td(r["dept"] or "—"),
                          Td(Strong(f"{r['score']:.1f}"), cls="num score-cell"),

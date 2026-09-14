@@ -182,7 +182,7 @@ def separations_page(status="All"):
                     Input(type="date", name="last_day", cls="hr-inp", required=True,
                           aria_label=_c("lc_last_workday")),
                      Input(name="reason", placeholder=_c("lc_reason"), cls="hr-inp", style="flex:1;"),
-                     Button(_c("lc_start"), cls="btn primary", type="submit"),
+                     Button(_c("lc_departure_start"), cls="btn primary", type="submit"),
                     method="post", action="/lifecycle/separations",
                     cls="inline-form", style="flex-wrap:wrap;gap:8px;"), cls="card")
     return (_title(_c("lc_departures"), _c("lc_departures_subtitle")),
@@ -334,7 +334,7 @@ def org_page(dept_id: int = 0, delta: int = 0):
                  for d in depts], name="dept_id", cls="hr-inp", aria_label="Osakond"),
         Input(type="number", name="delta", value=str(delta), cls="hr-inp", style="width:110px;",
               placeholder="+/- töötajat", aria_label="Töötajate muutus"),
-        Button("Modelleeri", cls="btn primary", type="submit"),
+        Button(_c("lc_model_button"), cls="btn primary", type="submit"),
         method="get", action="/lifecycle/org", cls="inline-form", style="gap:8px;")
 
     scen = Div(Div(H3("Töötajate stsenaarium"), cls="card-header"), scen_form,
