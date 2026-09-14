@@ -2,6 +2,17 @@
 
 Product changes are listed newest first. This file must remain synchronized with `docs/product_roadmap.md` under the rule documented there and in `AGENTS.md`.
 
+## 2026-09-14 — Admin pay-section pages in Estonian and English
+
+### Added
+
+- Localized the admin payroll, benefits, expenses and travel pages through the shared app i18n copy. Canonical payroll statuses, expense states, benefit categories and seed data remain unchanged.
+- Replaced the benefits page's ad-hoc language parameter with request-context-backed app copy and corrected the shared leave-type wording to “Puhkuse liik”.
+
+### Verification
+
+- Added authenticated bilingual coverage for payroll, benefits, expenses and travel pages; the full test suite is recorded with the pull request.
+
 ## 2026-09-14 — Admin time-section pages in Estonian and English
 
 ### Added

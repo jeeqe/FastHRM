@@ -2817,7 +2817,7 @@ def post(session, role_id: int):
 @rt("/benefits")
 def get(session, request):
     return _guard(session, "benefits",
-                  lambda: benefits.staff_page(resolve_lang(session, request)))
+                  benefits.staff_page)
 
 
 @rt("/benefits/plans", methods=["POST"])
