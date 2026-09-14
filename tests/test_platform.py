@@ -910,7 +910,6 @@ def test_time_section_pages_render_both_app_languages(fresh_db):
     for path, heading in english_pages.items():
         assert heading in client.get(f"{path}?lang=en").text
 
-
 def test_pay_benefits_expenses_and_travel_pages_render_both_app_languages(fresh_db):
     from starlette.testclient import TestClient
 
@@ -941,7 +940,6 @@ def test_pay_benefits_expenses_and_travel_pages_render_both_app_languages(fresh_
         assert heading in client.get(path).text
     for path, heading in english_pages.items():
         assert heading in client.get(f"{path}?lang=en").text
-
 
 def test_lifecycle_performance_and_settings_pages_render_both_app_languages(fresh_db):
     from starlette.testclient import TestClient
@@ -986,3 +984,16 @@ def test_lifecycle_performance_and_settings_pages_render_both_app_languages(fres
         assert heading in client.get(path).text
     for path, heading in english_pages.items():
         assert heading in client.get(f"{path}?lang=en").text
+
+    surfaces = {
+        "/lifecycle/onboarding": (("Uus töötaja", "Hilinenud"), ("New employee", "Overdue")),
+        "/performance/reviews": (("Hindamisperiood", "Loo"), ("Cycle", "Create")),
+        "/settings/integrations": (("Ühendatud", "Seadista"), ("Connected", "Configure")),
+    }
+    for path, (et_needles, en_needles) in surfaces.items():
+        et = client.get(f"{path}?lang=et").text
+        en = client.get(f"{path}?lang=en").text
+        for needle in et_needles:
+            assert needle in et
+        for needle in en_needles:
+            assert needle in en

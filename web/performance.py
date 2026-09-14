@@ -67,20 +67,20 @@ def goals_page(period="All", status="All", owner_type="All"):
             Div(_pill(g["status"], TONE.get(g["status"], "")), style="text-align:right;"),
             cls="goal-row"))
 
-    return (_title(_c("perf_goals"), f"{len(gs)} shown — cascading company → team → individual"),
-            Div(kpi_card("Active goals", k["goals"], f"{k['at_risk']} at risk or behind",
+    return (_title(_c("perf_goals"), _c("perf_shown").format(n=len(gs))),
+            Div(kpi_card(_c("perf_active_goals"), k["goals"], _c("perf_at_risk").format(n=k["at_risk"]),
                          tone="warn" if k["at_risk"] else ""),
-                kpi_card("Feedback (30d)", k["feedback_30d"], "pieces exchanged"),
-                kpi_card("Open review cycles", k["open_cycles"], f"{k['reviews_due']} reviews due",
+                kpi_card(_c("perf_feedback_30d"), k["feedback_30d"], _c("perf_pieces")),
+                kpi_card(_c("perf_open_cycles"), k["open_cycles"], f"{k['reviews_due']} {_c('perf_reviews_due').lower()}",
                          tone="danger" if k["reviews_due"] else ""),
-                kpi_card("Alignment", sum(1 for g in gs if g["parent_goal_id"]),
-                         "goals linked to a parent"),
+                kpi_card(_c("perf_alignment"), sum(1 for g in gs if g["parent_goal_id"]),
+                         _c("perf_linked")),
                 cls="kpi-grid"),
             seg, seg2,
             Div(_new_goal_form(), cls="card"),
-            Div(Div(H3("Goals"), A("Alignment tree →", href="/performance/alignment",
+             Div(Div(H3(_c("perf_goals")), A(_c("perf_alignment_link"), href="/performance/alignment",
                                    cls="btn sm"), cls="card-header"),
-                Div(*rows) if rows else P("No goals match.", style="color:var(--text-mute);"),
+                 Div(*rows) if rows else P(_c("perf_no_match"), style="color:var(--text-mute);"),
                 cls="card"))
 
 
@@ -92,7 +92,7 @@ def _new_goal_form():
     return Div(
         Div(H3(_c("perf_add_goal")), cls="card-header"),
         Form(
-            Input(name="title", placeholder="Goal title", cls="hr-inp", required=True,
+            Input(name="title", placeholder=_c("perf_add_a_goal"), cls="hr-inp", required=True,
                   style="flex:2;min-width:200px;"),
             Select(Option("Company", value="company"), Option("Department", value="department"),
                    Option("Employee", value="employee", selected=True),
@@ -110,7 +110,7 @@ def _new_goal_form():
                   style="width:100px;"),
             Input(name="period", placeholder="2026-Q3", cls="hr-inp", value="2026-Q3",
                   style="width:110px;"),
-            Button("Add goal", cls="btn primary", type="submit"),
+             Button(_c("perf_add_goal"), cls="btn primary", type="submit"),
             method="post", action="/performance/goals",
             cls="inline-form", style="flex-wrap:wrap;gap:8px;"))
 
@@ -124,40 +124,40 @@ def goal_detail(goal_id: int):
     children = people.goals()
     kids = [c for c in children if c["parent_goal_id"] == goal_id]
 
-    info = Div(Div(H3("Goal"), _pill(g["status"], TONE.get(g["status"], "")), cls="card-header"),
+    info = Div(Div(H3(_c("perf_goals")), _pill(g["status"], TONE.get(g["status"], "")), cls="card-header"),
                Div(Span("Owner", cls="k"), Span(g.get("owner_name") or g["owner_type"]),
                    Span("Metric", cls="k"), Span(g["metric"] or "—"),
-                   Span("Target", cls="k"), Span(f"{g['target'] or 0:g} {g['unit'] or ''}".strip()),
-                   Span("Current", cls="k"), Span(f"{g['current'] or 0:g}"),
-                   Span("Period", cls="k"), Span(g["period"] or "—"),
-                   Span("Due", cls="k"), Span(g["due_date"] or "—"),
-                   Span("Parent goal", cls="k"), Span(g["parent_title"] or "— top level"),
+                   Span(_c("perf_target"), cls="k"), Span(f"{g['target'] or 0:g} {g['unit'] or ''}".strip()),
+                   Span(_c("perf_current"), cls="k"), Span(f"{g['current'] or 0:g}"),
+                   Span(_c("perf_period"), cls="k"), Span(g["period"] or "—"),
+                   Span(_c("perf_due"), cls="k"), Span(g["due_date"] or "—"),
+                   Span(_c("perf_parent"), cls="k"), Span(g["parent_title"] or "— top level"),
                    cls="kv"),
                Div(_goal_bar(g), style="margin-top:12px;"),
-               P(f"{pct}% of target", style="color:var(--text-mute);font-size:12px;margin:6px 0 0;"),
+                P(_c("perf_of_target").format(n=pct), style="color:var(--text-mute);font-size:12px;margin:6px 0 0;"),
                cls="card")
 
-    form = Div(Div(H3("Check in"), cls="card-header"),
-               Form(Input(name="value", type="number", step="any", placeholder="Current value",
+    form = Div(Div(H3(_c("perf_checkin")), cls="card-header"),
+                Form(Input(name="value", type="number", step="any", placeholder=_c("perf_current_value"),
                           cls="hr-inp", required=True, style="width:140px;"),
                     Select(*[Option(s, value=s, selected=(s == g["status"]))
                              for s in people.GOAL_STATUSES], name="status", cls="hr-inp"),
-                    Input(name="note", placeholder="What changed?", cls="hr-inp", style="flex:1;"),
-                    Button("Save check-in", cls="btn primary", type="submit"),
+                     Input(name="note", placeholder=_c("perf_changed"), cls="hr-inp", style="flex:1;"),
+                     Button(_c("perf_save_checkin"), cls="btn primary", type="submit"),
                     **{"hx-post": f"/performance/goals/{goal_id}/checkin",
                        "hx-target": "#goal-body", "hx-swap": "innerHTML"},
                     cls="inline-form", style="flex-wrap:wrap;gap:8px;"), cls="card")
 
-    hist = Div(Div(H3("Check-in history"), cls="card-header"),
-               Table(Thead(Tr(Th("When"), Th("Value", cls="num"), Th("Status"), Th("Note"), Th("By"))),
+    hist = Div(Div(H3(_c("perf_checkin_history")), cls="card-header"),
+               Table(Thead(Tr(Th(_c("perf_when")), Th(_c("perf_value"), cls="num"), Th(_c("perf_status")), Th(_c("perf_note")), Th(_c("perf_by")))),
                      Tbody(*[Tr(Td(Small(h["created"], style="color:var(--text-mute);")),
                                  Td(f"{h['value']:g}" if h["value"] is not None else "—", cls="num"),
                                  Td(_pill(h["status"] or "—", TONE.get(h["status"], ""))),
                                  Td(h["note"] or "—"), Td(Small(h["created_by"] or "—")))
-                             for h in history] or [Tr(Td("No check-ins yet.", colspan="5"))]),
+                              for h in history] or [Tr(Td(_c("perf_no_checkins"), colspan="5"))]),
                      cls="tbl"), cls="card")
 
-    kid_card = Div(Div(H3(f"Contributing goals ({len(kids)})"), cls="card-header"),
+    kid_card = Div(Div(H3(_c("perf_contributing").format(n=len(kids))), cls="card-header"),
                    Div(*[Div(Div(Div(A(c["title"], href=f"/performance/goals/{c['id']}"), cls="t"),
                                  Div(c["owner_name"] or "—", cls="m")),
                              _goal_bar(c),
@@ -166,11 +166,11 @@ def goal_detail(goal_id: int):
                              Div(_pill(c["status"], TONE.get(c["status"], "")),
                                  style="text-align:right;"),
                              cls="goal-row") for c in kids]
-                       or [P("None linked to this goal.", style="color:var(--text-mute);")]),
+                        or [P(_c("perf_none_linked"), style="color:var(--text-mute);")]),
                    cls="card") if kids else None
 
     return (_title(g["title"], f"{g.get('owner_name') or ''} · {g['period'] or ''}".strip(" ·"),
-                   A("← Goals", href="/performance/goals", cls="btn")),
+                    A(_c("perf_goal_list"), href="/performance/goals", cls="btn")),
             Div(Div(form, hist, kid_card), Div(info), cls="detail-grid", id="goal-body"))
 
 
@@ -202,10 +202,10 @@ def alignment_page(period="All"):
     return (_title(_c("perf_goal_alignment"),
                    "How individual goals ladder up to team and company objectives"),
             seg,
-            Div(Div(H3(_c("perf_cascade")), A("← Goal list", href="/performance/goals", cls="btn sm"),
+             Div(Div(H3(_c("perf_cascade")), A(_c("perf_goal_list"), href="/performance/goals", cls="btn sm"),
                     cls="card-header"),
                 Div(*render(tree), cls="goal-tree") if tree
-                else P("No goals yet.", style="color:var(--text-mute);"), cls="card"))
+                 else P(_c("perf_no_goals"), style="color:var(--text-mute);"), cls="card"))
 
 
 # ---------- feedback --------------------------------------------------------
@@ -232,7 +232,7 @@ def feedback_page(kind="All"):
                            name="visibility", cls="hr-inp"),
                     Input(name="body", placeholder="What did they do well, or differently?",
                           cls="hr-inp", required=True, style="flex:1;min-width:220px;"),
-                    Button("Post", cls="btn primary", type="submit"),
+                     Button(_c("perf_post"), cls="btn primary", type="submit"),
                     **{"hx-post": "/performance/feedback", "hx-target": "#feed",
                        "hx-swap": "innerHTML"},
                     cls="inline-form", style="flex-wrap:wrap;gap:8px;"), cls="card")
@@ -254,7 +254,7 @@ def feed_list(kind="All"):
                          _pill(i["visibility"]),
                          style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap;"),
                      cls="feed-item")
-                 for i in items] or [P("No feedback yet.", style="color:var(--text-mute);")],
+                  for i in items] or [P(_c("perf_no_feedback"), style="color:var(--text-mute);")],
                cls="card")
 
 
@@ -263,8 +263,8 @@ def feed_list(kind="All"):
 def reviews_page():
     cs = people.cycles()
     k = people.performance_kpis()
-    tbl = Table(Thead(Tr(Th("Cycle"), Th("Period"), Th("Reviews", cls="num"),
-                         Th("Submitted", cls="num"), Th("Progress"), Th("Status"), Th(""))),
+    tbl = Table(Thead(Tr(Th(_c("perf_cycle")), Th(_c("perf_period")), Th(_c("perf_reviews"), cls="num"),
+                         Th(_c("perf_submitted"), cls="num"), Th(_c("perf_progress")), Th(_c("perf_status")), Th(""))),
                 Tbody(*[Tr(Td(A(Strong(c["name"]), href=f"/performance/reviews/{c['id']}")),
                            Td(f"{c['period_start']} → {c['period_end']}",
                               style="white-space:nowrap;color:var(--text-mute);"),
@@ -272,33 +272,33 @@ def reviews_page():
                            Td(str(c["n_done"]), cls="num"),
                            Td(_bar(round(100 * c["n_done"] / c["n_reviews"]) if c["n_reviews"] else 0)),
                            Td(_pill(c["status"])),
-                           Td(Button("Open cycle", cls="btn sm primary",
+                            Td(Button(_c("perf_open_cycle"), cls="btn sm primary",
                                      **{"hx-post": f"/performance/reviews/{c['id']}/status?status=Open",
                                         "hx-target": "#cycles", "hx-swap": "innerHTML"})
                               if c["status"] == "Draft" else
-                              Button("Calibrate", cls="btn sm",
+                               Button(_c("perf_calibrate"), cls="btn sm",
                                      **{"hx-post": f"/performance/reviews/{c['id']}/status?status=Calibration",
                                         "hx-target": "#cycles", "hx-swap": "innerHTML"})
                               if c["status"] == "Open" else Span("—", style="color:var(--text-mute);")))
-                        for c in cs] or [Tr(Td("No cycles yet.", colspan="7"))]), cls="tbl")
+                         for c in cs] or [Tr(Td(_c("perf_no_cycles"), colspan="7"))]), cls="tbl")
 
     form = Div(Div(H3(_c("perf_new_cycle")), cls="card-header"),
                Form(Input(name="name", placeholder="e.g. 2026 H2 review", cls="hr-inp",
                           required=True, style="flex:1;min-width:180px;"),
                     Input(type="date", name="period_start", cls="hr-inp", required=True, aria_label="Perioodi algus"),
                     Input(type="date", name="period_end", cls="hr-inp", required=True, aria_label="Perioodi lõpp"),
-                    Button("Create", cls="btn primary", type="submit"),
+                     Button(_c("perf_create"), cls="btn primary", type="submit"),
                     method="post", action="/performance/reviews",
                     cls="inline-form", style="flex-wrap:wrap;gap:8px;"), cls="card")
 
     return (_title(_c("perf_cycles"), _c("perf_cycle_subtitle")),
-            Div(kpi_card("Open cycles", k["open_cycles"]),
-                kpi_card("Reviews due", k["reviews_due"], "not yet submitted",
+            Div(kpi_card(_c("perf_open_cycles"), k["open_cycles"]),
+                kpi_card(_c("perf_reviews_due"), k["reviews_due"], _c("perf_not_submitted"),
                          tone="danger" if k["reviews_due"] else ""),
-                kpi_card("Active goals", k["goals"]),
-                kpi_card("Feedback (30d)", k["feedback_30d"]),
+                kpi_card(_c("perf_active_goals"), k["goals"]),
+                kpi_card(_c("perf_feedback_30d"), k["feedback_30d"]),
                 cls="kpi-grid"),
-            form, Div(Div(Div(H3("Cycles"), cls="card-header"), tbl, cls="card"), id="cycles"))
+            form, Div(Div(Div(H3(_c("perf_cycles")), cls="card-header"), tbl, cls="card"), id="cycles"))
 
 
 def cycles_fragment():
@@ -317,8 +317,8 @@ def cycle_detail(cycle_id: int, status="All"):
                   cls="active" if status == s else "")
                 for s in ["All"] + people.REVIEW_STATUSES], cls="seg")
 
-    tbl = Table(Thead(Tr(Th("Employee"), Th("Department"), Th("Kind"), Th("Reviewer"),
-                         Th("Overall", cls="num"), Th("Status"), Th(""))),
+    tbl = Table(Thead(Tr(Th(_c("perf_employee")), Th(_c("perf_department")), Th(_c("perf_kind")), Th(_c("perf_reviewer")),
+                         Th(_c("perf_overall"), cls="num"), Th(_c("perf_status")), Th(""))),
                 Tbody(*[Tr(Td(r["employee"]), Td(r["dept"] or "—"), Td(_pill(r["kind"])),
                            Td(r["reviewer"] or "—"),
                            Td(f"{r['overall']:.1f}" if r["overall"] else "—", cls="num"),
@@ -326,23 +326,23 @@ def cycle_detail(cycle_id: int, status="All"):
                            Td(A("Complete", href=f"/performance/reviews/{cycle_id}/{r['id']}",
                                 cls="btn sm") if r["status"] != "Submitted"
                               else Span("—", style="color:var(--text-mute);")))
-                        for r in rs] or [Tr(Td("No reviews.", colspan="7"))]), cls="tbl")
+                        for r in rs] or [Tr(Td(_c("perf_no_reviews"), colspan="7"))]), cls="tbl")
 
     cal = Div(Div(H3(_c("perf_calibration")), cls="card-header"),
-              Table(Thead(Tr(Th("Department"), Th("Reviews", cls="num"), Th("Average", cls="num"),
-                             Th("Range", cls="num"))),
+              Table(Thead(Tr(Th(_c("perf_department")), Th(_c("perf_reviews"), cls="num"), Th(_c("perf_average"), cls="num"),
+                             Th(_c("perf_range"), cls="num"))),
                     Tbody(*[Tr(Td(g["dept"] or "—"), Td(str(g["n"]), cls="num"),
                                Td(Strong(f"{g['avg_score']:.2f}"), cls="num"),
                                Td(f"{g['lo']:.1f} – {g['hi']:.1f}", cls="num"))
-                            for g in grid] or [Tr(Td("Nothing submitted yet.", colspan="4"))]),
+                            for g in grid] or [Tr(Td(_c("perf_nothing_submitted"), colspan="4"))]),
                     cls="tbl"), cls="card")
 
     mx = max((d["n"] for d in dist), default=1) or 1
-    distro = Div(Div(H3("Rating distribution"), cls="card-header"),
+    distro = Div(Div(H3(_c("perf_rating")), cls="card-header"),
                  *[Div(Div(f"{d['band']} ★", style="color:var(--text-dim);"),
                        Div(Div(cls="funnel-bar", style=f"width:{max(2, 100 * d['n'] / mx):.0f}%;")),
                        Div(str(d["n"]), cls="v"), cls="funnel-row") for d in dist]
-                 or [P("Nothing submitted yet.", style="color:var(--text-mute);")], cls="card")
+                  or [P(_c("perf_nothing_submitted"), style="color:var(--text-mute);")], cls="card")
 
     return (_title(c["name"], f"{c['period_start']} → {c['period_end']} · {c['status']}",
                    A("← Cycles", href="/performance/reviews", cls="btn")),
@@ -357,29 +357,29 @@ def review_form(cycle_id: int, review_id: int):
                   FROM reviews r JOIN employees e ON e.id=r.employee_id
                   LEFT JOIN employees rv ON rv.id=r.reviewer_id WHERE r.id=?""", (review_id,))
     if not r:
-        return _title("Review not found"), P("No such review.")
+        return _title(_c("perf_review_not_found")), P(_c("perf_no_such_review"))
     comps = talent.competencies()
     return (_title(f"{r['kind']} review — {r['employee']}", r["designation"] or "",
                    A("← Cycle", href=f"/performance/reviews/{cycle_id}", cls="btn")),
-            Div(Div(H3("Ratings"), cls="card-header"),
+             Div(Div(H3(_c("perf_review")), cls="card-header"),
                 Form(
                     *[Div(Label(c["name"], style="font-size:13px;font-weight:600;"),
                           Small(f" — {c['description'] or c['category']}",
                                 style="color:var(--text-mute);"),
                           Select(*[Option(f"{i} — {lbl}", value=str(i)) for i, lbl in
-                                   ((5, "Outstanding"), (4, "Exceeds"), (3, "Meets"),
-                                    (2, "Developing"), (1, "Below"))],
+                                     ((5, _c("perf_outstanding")), (4, _c("perf_exceeds")), (3, _c("perf_meets")),
+                                      (2, _c("perf_developing")), (1, _c("perf_below")))],
                                  name=f"comp_{c['id']}", cls="hr-inp",
                                  style="margin-left:10px;width:190px;"),
                           style="margin-bottom:10px;display:flex;align-items:center;"
                                 "justify-content:space-between;gap:10px;")
                       for c in comps],
-                    Div(Label("Overall summary", style="font-size:13px;font-weight:600;"),
+                    Div(Label(_c("perf_overall_summary"), style="font-size:13px;font-weight:600;"),
                         Textarea(name="narrative", cls="prompt-box",
                                  style="min-height:150px;margin-top:6px;",
-                                 placeholder="What went well, what to work on next."),
+                                 placeholder=_c("perf_review_prompt")),
                         style="margin-top:14px;"),
-                    Button("Submit review", cls="btn primary", type="submit",
+                    Button(_c("perf_submit_review"), cls="btn primary", type="submit",
                            style="margin-top:12px;"),
                     method="post", action=f"/performance/reviews/{cycle_id}/{review_id}"),
                 cls="card"))
