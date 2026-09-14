@@ -785,3 +785,41 @@ def test_app_shell_sets_html_lang(fresh_db):
     from web.layout import page
 
     assert '<html lang="et">' in str(page("home", "", "a@b.c", None, Div("x")))
+
+
+def test_authenticated_language_persists_and_switches_on_admin_and_portal(fresh_db):
+    from starlette.testclient import TestClient
+
+    import web_app
+    from web import selfservice
+
+    with fresh_db.cursor() as conn:
+        conn.execute(
+            "INSERT INTO employees(first_name,last_name,status,email,password_hash) "
+            "VALUES ('Ada','Lovelace','Active','ada@example.com',?)",
+            (selfservice.hash_password("secret"),),
+        )
+
+    client = TestClient(web_app.app)
+    assert '<html lang="et">' in client.get("/login").text
+    client.post("/login", data={"email": web_app.VALID_EMAIL,
+                                "password": web_app.VALID_PASSWORD})
+
+    english = client.get("/?lang=en")
+    assert '<html lang="en">' in english.text
+    assert 'href="/?lang=et"' in english.text
+    assert 'href="/?lang=en"' in english.text
+    assert "OVERVIEW" in english.text
+    assert '<html lang="en">' in client.get("/").text
+
+    estonian = client.get("/?lang=et")
+    assert '<html lang="et">' in estonian.text
+    assert "ÜLEVAADE" in estonian.text
+
+    portal_client = TestClient(web_app.app)
+    portal_client.post("/me/login", data={"email": "ada@example.com",
+                                           "password": "secret"})
+    portal = portal_client.get("/me?lang=en")
+    assert '<html lang="en">' in portal.text
+    assert 'href="/me?lang=et"' in portal.text
+    assert 'href="/me?lang=en"' in portal.text

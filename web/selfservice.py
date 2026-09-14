@@ -12,6 +12,7 @@ import db
 import people
 import benefits
 import learning
+from web.i18n import current_lang, current_path
 
 
 PORTAL_CSS = """
@@ -51,14 +52,22 @@ def _name(employee):
 
 
 def _shell(active: str, employee, *content):
+    lang = current_lang()
+    path = current_path()
     links = [("home", "Avaleht", "/me"), ("pay", "Palk", "/me/pay"), ("leave", "Puhkused", "/me/leave"),
              ("time", "Tööaeg", "/me/time"), ("expenses", "Kulud ja lähetused", "/me/expenses"),
              ("onboarding", "Sisseelamine ja eesmärgid", "/me/onboarding")]
-    return (Title("FastHR · töötaja iseteenindus"), Style(PORTAL_CSS),
-            Div(Div(A("FastHR", href="/me", cls="me-brand"),
-                    Div(Span(_name(employee), cls="me-muted"), A("Logi välja", href="/me/logout"), style="display:flex;gap:16px;align-items:center"), cls="me-top"),
-                Div(*[A(label, href=href, cls="active" if active == key else "") for key, label, href in links], cls="me-nav"),
-                Main(*content, cls="me-main"), cls="me-shell"))
+    switcher = Div(A("ET", href=f"{path}?lang=et", cls="active" if lang == "et" else ""),
+                   A("EN", href=f"{path}?lang=en", cls="active" if lang == "en" else ""),
+                   style="display:flex;gap:8px;font-size:11px;font-weight:700")
+    return Html(Head(Title("FastHR · töötaja iseteenindus"), Style(PORTAL_CSS)),
+                Body(Div(Div(A("FastHR", href="/me", cls="me-brand"),
+                             Div(Span(_name(employee), cls="me-muted"), switcher,
+                                 A("Logi välja", href="/me/logout"),
+                                 style="display:flex;gap:16px;align-items:center"), cls="me-top"),
+                         Div(*[A(label, href=href, cls="active" if active == key else "") for key, label, href in links], cls="me-nav"),
+                         Main(*content, cls="me-main"), cls="me-shell")),
+                lang=lang)
 
 
 def login_page(error=""):

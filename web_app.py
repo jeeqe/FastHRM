@@ -35,6 +35,7 @@ from fasthtml.common import (
 )
 from starlette.responses import FileResponse, StreamingResponse, Response
 from starlette.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 import db
 import talent
@@ -52,7 +53,7 @@ import version
 from web.layout import page, LAYOUT_CSS, NAV_ITEMS
 from web import views, ai, ats, careers, cv_extract, ranking, performance, lifecycle, recruiting_platform, settings, selfservice, statutory
 from web.landing import comparison_page, features_page, landing_page
-from web.i18n import resolve_lang
+from web.i18n import reset_request_context, resolve_lang, set_request_context
 from web.i18n import t
 from web.rbac import can
 from web.seo import register_seo_routes
@@ -71,6 +72,21 @@ PORT = int(os.getenv("FASTHR_PORT", "5010"))
 
 app, rt = fast_app(live=False, pico=False, secret_key=SECRET, hdrs=[Style(LAYOUT_CSS)])
 app.mount("/api", api)
+
+
+class AppLanguageMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        tokens = set_request_context(resolve_lang(request.session, request), request.url.path)
+        try:
+            return await call_next(request)
+        finally:
+            reset_request_context(tokens)
+
+
+app.add_middleware(AppLanguageMiddleware)
+# FastHTML installs the session middleware first; keep it outermost so the
+# request context can use the decoded signed session.
+app.user_middleware.reverse()
 
 
 @rt("/swagger.json", methods=["GET"])

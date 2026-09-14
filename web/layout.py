@@ -30,6 +30,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{text-decoration:underline;}
 .ver-pill{background:var(--surface-2);color:var(--text-mute);border:1px solid var(--border);padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .ver-pill:hover{color:var(--accent-hover);border-color:var(--accent);text-decoration:none;}
 .topbar .actions{display:flex;gap:10px;align-items:center;}
+.app-lang{display:flex;gap:4px;align-items:center;font-size:11px;font-weight:700;letter-spacing:.4px;}
+.app-lang a{padding:3px 4px;color:var(--text-mute);}.app-lang a.active{color:var(--accent-hover);text-decoration:underline;}
 .left-pane{grid-area:left;background:var(--surface);border-right:1px solid var(--border);padding:12px 0;overflow-y:auto;}
 .nav-section-controls{display:flex;justify-content:flex-end;gap:6px;padding:0 12px 8px}.nav-section-controls button{min-width:34px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text-mute);font-size:11px;cursor:pointer}.nav-section-controls button:hover{color:var(--accent-hover);border-color:var(--accent)}
 .nav-section{border-bottom:1px solid var(--border)}.nav-section:last-child{border-bottom:0}.nav-section-toggle{display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;padding:8px 16px 4px}.nav-section-toggle::-webkit-details-marker{display:none}.nav-section-toggle h4{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-mute);font-weight:700}.nav-section-toggle:hover h4{color:var(--accent-hover)}.nav-section-arrow::after{content:">>";color:var(--text-mute);font-size:10px;font-weight:900}.nav-section[open]>.nav-section-toggle .nav-section-arrow::after{content:"<<"}.nav-section-items{padding-bottom:8px}
@@ -331,15 +333,20 @@ def nav_icon(name):
 SAMPLE_QUESTIONS = ["Kes on täna puhkusel?", "Milline meeskond on suurim?", "Mitu puhkuse taotlust on ootel?"]
 
 
-def topbar(env, user_email):
+def topbar(env, user_email, lang="et", path="/"):
     import version
+    from web.i18n import t_app
+
     right = Div(
-        Button(NotStr("&laquo; Vestlus"), id="copilot-topbar-toggle", cls="btn", onclick="toggleCopilot()") if user_email else None,
+        Button(NotStr(f"&laquo; {t_app(lang, 'chat')}"), id="copilot-topbar-toggle", cls="btn", onclick="toggleCopilot()") if user_email else None,
         Span(env, cls="env-pill") if env else None,
         # Which build am I looking at? Answerable without opening a terminal.
         A(version.label(), href="/about", cls="ver-pill", title=version.detail()) if user_email else None,
         Span(user_email or "", style="color:var(--text-mute);font-size:12px;") if user_email else None,
-        A("Logi välja", href="/logout", cls="btn") if user_email else None, cls="actions")
+        Div(A("ET", href=f"{path}?lang=et", cls="active" if lang == "et" else ""),
+            A("EN", href=f"{path}?lang=en", cls="active" if lang == "en" else ""),
+            cls="app-lang") if user_email else None,
+        A(t_app(lang, "logout"), href="/logout", cls="btn") if user_email else None, cls="actions")
     brand = Div(Span(cls="brand-dot"), Span("FastHR", style="font-weight:800;"), cls="brand")
     left = Div(
         Button(NotStr("&#9776;"), type="button", id="nav-toggle", cls="nav-toggle",
@@ -349,14 +356,20 @@ def topbar(env, user_email):
     return Div(left, right, cls="topbar")
 
 
-def left_pane(active):
+def left_pane(active, lang="et"):
+    from web.i18n import t_app
+
+    section_copy = {
+        "Ülevaade": "nav_overview", "Inimesed": "nav_people", "Aeg": "nav_time",
+        "Palk": "nav_pay", "Värbamine": "nav_talent",
+    }
     sections = []
     for name, items in NAV_ITEMS:
         links = [A(Span(nav_icon(icon), cls="nav-icon"), Span(label), href=href,
                    cls=f"nav-item {'active' if active == key else ''}") for key, label, icon, href in items]
         sections.append(
             Details(
-                Summary(H4(name), Span(cls="nav-section-arrow", aria_hidden="true"),
+                Summary(H4(t_app(lang, section_copy.get(name, name)), Span(cls="nav-section-arrow", aria_hidden="true")),
                         cls="nav-section-toggle", aria_label=f"Ava või sulge {name}"),
                 Div(*links, cls="nav-section-items"),
                 open=True, cls="nav-section", data_section=name.lower(),
@@ -377,9 +390,11 @@ def _sample_cards():
     return Div(Div(Span("Proovi küsida:", cls="sample-cards-label")), Div(*cards), cls="sample-cards")
 
 
-def right_pane_chat(thread_id):
+def right_pane_chat(thread_id, lang="et"):
+    from web.i18n import t_app
+
     return Div(
-        Div(H3("AI-abiline"),
+        Div(H3(t_app(lang, "ai_assistant")),
             Div(Button("Uus", cls="btn", hx_get="/chat/new", hx_target="#chat-body", hx_swap="innerHTML"),
                 Button(NotStr("&laquo;"), id="copilot-exp-btn", cls="copilot-exp", onclick="toggleExpand()"),
                 Button(NotStr("&rsaquo;"), cls="copilot-min", onclick="toggleCopilot()"), cls="tabs"),
@@ -396,19 +411,23 @@ def right_pane_chat(thread_id):
         cls="right-pane")
 
 
-def page(active, env, user_email, thread_id, *content, right_override=None):
-    right = right_override if right_override is not None else right_pane_chat(thread_id)
+def page(active, env, user_email, thread_id, *content, right_override=None, lang=None, path=None):
+    from web.i18n import current_lang, current_path, t_app
+
+    lang = lang or current_lang()
+    path = path or current_path()
+    right = right_override if right_override is not None else right_pane_chat(thread_id, lang)
     return Html(Head(Title("FastHR"),
                      Link(rel="icon", type="image/svg+xml", href="/static/favicon.svg"),
                      Script(src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"),
                      Style(LAYOUT_CSS)),
-                Body(Div(topbar(env, user_email), left_pane(active), Div(*content, cls="center-pane"), right,
+                Body(Div(topbar(env, user_email, lang, path), left_pane(active, lang), Div(*content, cls="center-pane"), right,
                          Button(type="button", id="app-backdrop", aria_hidden="true", tabindex="-1",
                                 onclick="closeOverlays()"),
-                         Div(NotStr("&lsaquo; AI-abiline"), id="copilot-reopen", onclick="toggleCopilot()"),
+                         Div(NotStr(f"&lsaquo; {t_app(lang, 'copilot_reopen')}"), id="copilot-reopen", onclick="toggleCopilot()"),
                          cls="app"),
                      Script(LAYOUT_JS)),
-                lang="et")
+                lang=lang)
 
 
 def kpi_card(label, value, trend="", tone=""):

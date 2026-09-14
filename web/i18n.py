@@ -5,10 +5,14 @@ Estonian is the primary market and the default. Language is chosen from the
 """
 from __future__ import annotations
 
+from contextvars import ContextVar
+
 from web.layout import nav_icon
 
 LANGS = ("et", "en")
 DEFAULT_LANG = "et"
+_ACTIVE_LANG = ContextVar("fasthr_active_lang", default=DEFAULT_LANG)
+_ACTIVE_PATH = ContextVar("fasthr_active_path", default="/")
 
 
 def resolve_lang(session=None, request=None) -> str:
@@ -28,6 +32,28 @@ def resolve_lang(session=None, request=None) -> str:
         except Exception:
             pass
     return lang
+
+
+def set_request_context(lang: str, path: str):
+    """Set the language and path used by layouts during the current request."""
+    lang_token = _ACTIVE_LANG.set(lang if lang in LANGS else DEFAULT_LANG)
+    path_token = _ACTIVE_PATH.set(path or "/")
+    return lang_token, path_token
+
+
+def reset_request_context(tokens) -> None:
+    """Restore layout context after a request has been rendered."""
+    lang_token, path_token = tokens
+    _ACTIVE_LANG.reset(lang_token)
+    _ACTIVE_PATH.reset(path_token)
+
+
+def current_lang() -> str:
+    return _ACTIVE_LANG.get()
+
+
+def current_path() -> str:
+    return _ACTIVE_PATH.get()
 
 
 def t(lang: str) -> dict:
@@ -599,3 +625,34 @@ COPY = {
         },
     },
 }
+
+
+APP_COPY = {
+    "et": {
+        "nav_overview": "ÜLEVAADE",
+        "nav_people": "INIMESED",
+        "nav_time": "AEG",
+        "nav_pay": "PALK",
+        "nav_talent": "TALENT",
+        "chat": "Vestlus",
+        "ai_assistant": "AI-abiline",
+        "logout": "Logi välja",
+        "copilot_reopen": "AI-abiline",
+    },
+    "en": {
+        "nav_overview": "OVERVIEW",
+        "nav_people": "PEOPLE",
+        "nav_time": "TIME",
+        "nav_pay": "PAY",
+        "nav_talent": "TALENT",
+        "chat": "Chat",
+        "ai_assistant": "AI Assistant",
+        "logout": "Logout",
+        "copilot_reopen": "AI Assistant",
+    },
+}
+
+
+def t_app(lang: str, key: str) -> str:
+    """Return one authenticated-app chrome label."""
+    return APP_COPY.get(lang, APP_COPY[DEFAULT_LANG]).get(key, key)
