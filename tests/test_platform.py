@@ -251,12 +251,21 @@ def test_benefit_pay_run_lines_are_employer_cost_and_idempotent(fresh_db):
 def test_benefit_staff_page_and_portal_card_render_bilingually(fresh_db):
     import benefits
     from web import selfservice
+    from web.i18n import reset_request_context, set_request_context
 
     eid = _statutory_employee(fresh_db)
     plan = benefits.save_plan("Lunch", "other", 25)
     benefits.enrol(plan, eid, "2026-01-01")
-    assert "Soodustused" in str(benefits.staff_page("et"))
-    assert "Benefits" in str(benefits.staff_page("en"))
+    et_tokens = set_request_context("et", "/benefits")
+    try:
+        assert "Soodustused" in str(benefits.staff_page())
+    finally:
+        reset_request_context(et_tokens)
+    en_tokens = set_request_context("en", "/benefits")
+    try:
+        assert "Benefits" in str(benefits.staff_page())
+    finally:
+        reset_request_context(en_tokens)
     portal = str(selfservice.pay_page(fresh_db.employee(eid)))
     assert "Minu soodustused" in portal
     assert "Lunch" in portal and "25.00 EUR" in portal
@@ -895,6 +904,38 @@ def test_time_section_pages_render_both_app_languages(fresh_db):
         "/attendance": "Attendance",
         "/shifts": "Shifts &amp; roster",
         "/timeclock": "Time clocks",
+    }
+    for path, heading in estonian_pages.items():
+        assert heading in client.get(path).text
+    for path, heading in english_pages.items():
+        assert heading in client.get(f"{path}?lang=en").text
+
+
+def test_pay_benefits_expenses_and_travel_pages_render_both_app_languages(fresh_db):
+    from starlette.testclient import TestClient
+
+    import web_app
+
+    client = TestClient(web_app.app)
+    client.post("/login", data={"email": web_app.VALID_EMAIL,
+                                "password": web_app.VALID_PASSWORD})
+    run_id = fresh_db.create_pay_run("2099-06", [])
+
+    estonian_pages = {
+        "/payroll": "Palgaperioodid",
+        "/payroll/runs/new": "Uus palgaperiood",
+        f"/payroll/runs/{run_id}": "Palgaperiood · 2099-06",
+        "/benefits": "Soodustused",
+        "/expenses": "Kulud ja avansid",
+        "/travel": "Lähetused",
+    }
+    english_pages = {
+        "/payroll": "Pay periods",
+        "/payroll/runs/new": "New pay run",
+        f"/payroll/runs/{run_id}": "Pay run · 2099-06",
+        "/benefits": "Benefits",
+        "/expenses": "Expenses and advances",
+        "/travel": "Travel",
     }
     for path, heading in estonian_pages.items():
         assert heading in client.get(path).text

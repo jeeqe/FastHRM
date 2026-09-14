@@ -6,6 +6,7 @@ import sqlite3
 
 import db
 from fasthtml.common import A, Button, Div, Form, H1, H3, Input, Option, P, Select, Table, Tbody, Td, Th, Thead, Tr
+from web.i18n import current_lang, t_app
 
 PLAN_CATEGORIES = ("health", "pension_extra", "sport", "commute", "other")
 
@@ -111,10 +112,9 @@ def monthly_cost(conn: sqlite3.Connection, employee_id: int, period: str | date)
             if row["employee_id"] == employee_id]
 
 
-def staff_page(lang: str = "et"):
-    et = lang != "en"
-    title = "Soodustused" if et else "Benefits"
-    plan_title = "Soodustused" if et else "Benefit plans"
+def staff_page():
+    lang = current_lang()
+    copy = lambda key: t_app(lang, key)
     employees = db.rows("""SELECT e.id, e.first_name, e.last_name, d.name AS department
                            FROM employees e LEFT JOIN departments d ON d.id=e.dept_id
                            WHERE e.status='Active' ORDER BY e.first_name, e.last_name""")
@@ -123,27 +123,26 @@ def staff_page(lang: str = "et"):
     enrolments = {(row["employee_id"], row["plan_id"]): row
                   for employee in employees for row in enrolments_for(employee["id"])}
     form = Form(
-        Input(name="name", placeholder="Soodustus" if et else "Benefit plan", required=True),
+        Input(name="name", placeholder=copy("benefits_plan"), required=True),
         Select(*[Option(category, value=category) for category in PLAN_CATEGORIES], name="category"),
         Input(name="employer_contribution", type="number", min="0", step="0.01",
-              placeholder="Tööandja kulu" if et else "Employer contribution", required=True),
-        Select(Option("Kuus" if et else "Monthly", value="monthly"),
-               Option("Iga palgaarvestuse korral" if et else "Per pay run", value="per_payrun"),
+              placeholder=copy("benefits_employer"), required=True),
+        Select(Option(copy("benefits_monthly"), value="monthly"),
+               Option(copy("benefits_per_payrun"), value="per_payrun"),
                name="contribution_frequency"),
-        Select(Option("Kõik aktiivsed" if et else "All active", value="all_active"),
-               Option("Osakond" if et else "Department", value="department"), name="eligibility"),
-        Select(Option("Kõik osakonnad" if et else "All departments", value="0"),
+        Select(Option(copy("benefits_all_active"), value="all_active"),
+               Option(copy("benefits_department"), value="department"), name="eligibility"),
+        Select(Option(copy("benefits_all_departments"), value="0"),
                *[Option(d["name"], value=str(d["id"])) for d in departments], name="department_id"),
-        Button("Salvesta" if et else "Save", type="submit", cls="btn primary"),
+        Button(copy("benefits_save"), type="submit", cls="btn primary"),
         method="post", action="/benefits/plans", cls="inline-form")
     plan_rows = [Tr(Td(p["name"]), Td(p["category"]), Td(f"{p['employer_contribution']:,.2f} EUR"),
                     Td(str(p["enrolment_count"])),
-                    Td(A("Keela" if et else "Deactivate", href=f"/benefits/plans/{p['id']}/deactivate", cls="btn sm")))
+                    Td(A(copy("benefits_deactivate"), href=f"/benefits/plans/{p['id']}/deactivate", cls="btn sm")))
                  for p in plans]
-    plan_table = Table(Thead(Tr(Th("Nimi" if et else "Name"), Th("Kategooria" if et else "Category"),
-                               Th("Tööandja kulu" if et else "Employer contribution"),
-                               Th("Registreerunud" if et else "Enrolled"), Th(""))),
-                       Tbody(*plan_rows or [Tr(Td("Soodustusi pole." if et else "No benefit plans.", colspan="5"))]), cls="tbl")
+    plan_table = Table(Thead(Tr(Th(copy("benefits_name")), Th(copy("benefits_category")),
+                               Th(copy("benefits_employer")), Th(copy("benefits_enrolled")), Th(""))),
+                       Tbody(*plan_rows or [Tr(Td(copy("benefits_empty"), colspan="5"))]), cls="tbl")
     cells = []
     for employee in employees:
         row = [Td(f"{employee['first_name']} {employee['last_name']}")]
@@ -156,12 +155,11 @@ def staff_page(lang: str = "et"):
                                    onchange="this.form.submit()", aria_label=f"{employee['first_name']} {plan['name']}"),
                              method="post", action="/benefits/enrol")))
         cells.append(Tr(*row))
-    enrol_table = Table(Thead(Tr(Th("Töötaja" if et else "Employee"),
+    enrol_table = Table(Thead(Tr(Th(copy("benefits_employee")),
                                 *[Th(plan["name"]) for plan in plans])),
-                        Tbody(*(cells or [Tr(Td("Aktiivseid töötajaid pole." if et else "No active employees.",
+                        Tbody(*(cells or [Tr(Td(copy("benefits_no_employees"),
                                                   colspan=str(len(plans) + 1))) ])), cls="tbl")
-    return (Div(H1(title), P("Tööandjapoolsed soodustused: registreerimine ja kulu" if et else
-                         "Eligibility, enrolment and employer contribution tracking", cls="sub"), cls="page-title"),
-            Div(Div(H3(plan_title), form, cls="card-header"), plan_table, cls="card"),
-            Div(Div(H3("Töötajate registreerimine" if et else "Employee enrolment"), cls="card-header"),
+    return (Div(H1(copy("benefits_title")), P(copy("benefits_subtitle"), cls="sub"), cls="page-title"),
+            Div(Div(H3(copy("benefits_plan_title")), form, cls="card-header"), plan_table, cls="card"),
+            Div(Div(H3(copy("benefits_enrolment")), cls="card-header"),
                 enrol_table, cls="card"))
