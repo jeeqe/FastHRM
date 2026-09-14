@@ -492,7 +492,7 @@ def statutory_exports_page():
     table = Table(Thead(Tr(Th(c("pay_export_type")), Th(c("pay_period")), Th(c("pay_file")), Th(c("pay_rows"), cls="num"),
                          Th(c("pay_created")), Th(""))),
                   Tbody(*[Tr(Td(e["kind"]), Td(e["period"]), Td(e["file_name"]),
-                           Td(str(e["row_count"]), cls="num"), Td(e["created_at"] or "Puudub"),
+                           Td(str(e["row_count"]), cls="num"), Td(e["created_at"] or c("pay_missing")),
                            Td(A(c("pay_download"), href=f"/payroll/exports/{e['id']}", cls="btn sm")))
                         for e in exports] or [Tr(Td(c("pay_exports_empty"), colspan="6"))]), cls="tbl")
     return (_title(c("pay_export_history"), c("pay_exports_subtitle")), Div(table, cls="card"))
@@ -519,7 +519,7 @@ def payslip_detail(pid):
         line_rows += [Tr(Td(line["label"]), Td("− " + money(line["amount"]), cls="num",
                                              style="color:var(--danger);")) for line in deductions]
         if employer_costs:
-            line_rows += [Tr(Td(Strong(t("et")["payroll_employer_costs"])), Td(""))]
+            line_rows += [Tr(Td(Strong(t(lang)["payroll_employer_costs"])), Td(""))]
             line_rows += [Tr(Td(line["label"]), Td(money(line["amount"]), cls="num"))
                           for line in employer_costs]
         line_rows += [Tr(Td(Strong(c("pay_net"))), Td(Strong(money(p["net"])), cls="num"))]
@@ -557,7 +557,7 @@ def expenses_page():
     for c in claims:
         actions = []
         if c["status"] == "Submitted":
-            actions = [Form(Button("Kinnita", type="submit", cls="btn sm primary"), method="post", action=f"/expenses/{c['id']}/decide?decision=Approved") ,
+            actions = [Form(Button(c("expenses_approve"), type="submit", cls="btn sm primary"), method="post", action=f"/expenses/{c['id']}/decide?decision=Approved") ,
                         Form(Button(c("expenses_reject"), type="submit", cls="btn sm"), method="post",
                              action=f"/expenses/{c['id']}/decide?decision=Rejected")]
         elif c["status"] == "Approved":
