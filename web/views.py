@@ -177,23 +177,28 @@ def departments_list():
 # ---------- leave -----------------------------------------------------------
 
 def _apply_form():
+    lang = current_lang()
     emps = db.employees_min()
-    return Div(Div(H3("Puhkuse taotlus"), cls="card-header"),
+    return Div(Div(H3(t_app(lang, "leave_form_title")), cls="card-header"),
                Form(
                    Select(*[Option(f"{e['first_name']} {e['last_name']}", value=str(e["id"])) for e in emps],
-                          name="employee_id", cls="hr-inp", aria_label="Töötaja"),
+                          name="employee_id", cls="hr-inp", aria_label=t_app(lang, "leave_employee")),
                    Select(*[Option(t, value=t) for t in db.LEAVE_TYPES], name="leave_type", cls="hr-inp",
-                          aria_label="Puhkuseliik"),
-                   Input(type="date", name="from_date", cls="hr-inp", required=True, aria_label="Alguskuupäev"),
-                   Input(type="date", name="to_date", cls="hr-inp", required=True, aria_label="Lõppkuupäev"),
-                   Input(name="reason", placeholder="Põhjus", cls="hr-inp", style="flex:1;min-width:140px;"),
-                   Button("Esita", cls="btn primary", type="submit"),
+                          aria_label=t_app(lang, "leave_type")),
+                   Input(type="date", name="from_date", cls="hr-inp", required=True,
+                         aria_label=t_app(lang, "leave_start_date")),
+                   Input(type="date", name="to_date", cls="hr-inp", required=True,
+                         aria_label=t_app(lang, "leave_end_date")),
+                   Input(name="reason", placeholder=t_app(lang, "leave_reason_placeholder"), cls="hr-inp",
+                         style="flex:1;min-width:140px;"),
+                   Button(t_app(lang, "leave_submit"), cls="btn primary", type="submit"),
                    **{"hx-post": "/leave/apply", "hx-target": "#leave-main", "hx-swap": "innerHTML"},
                    cls="inline-form", style="flex-wrap:wrap;gap:8px;"),
                cls="card")
 
 
 def leave_main(status="Pending"):
+    lang = current_lang()
     seg = Div(*[A(s, href=f"/leave?status={s}", cls="" + ("active" if status == s else ""))
                 for s in ["Pending", "All"] + [st for st in db.LEAVE_STATUSES if st != "Pending"]], cls="seg")
     clause, params = ("", ()) if status == "All" else ("WHERE lr.status=?", (status,))
@@ -203,29 +208,35 @@ def leave_main(status="Pending"):
     rows_ = []
     for r in reqs:
         if r["status"] == "Pending":
-            act = Div(Button("✓ Approve", cls="btn sm primary",
+            act = Div(Button(t_app(lang, "leave_approve"), cls="btn sm primary",
                              **{"hx-post": f"/leave/{r['id']}/approve", "hx-target": "#leave-main", "hx-swap": "innerHTML"}),
-                      Button("✕ Reject", cls="btn sm", title="Reject",
+                      Button(t_app(lang, "leave_reject"), cls="btn sm", title=t_app(lang, "leave_reject"),
                              **{"hx-post": f"/leave/{r['id']}/reject", "hx-target": "#leave-main", "hx-swap": "innerHTML"}),
                       style="display:flex;gap:4px;")
         else:
-            act = Span("Puudub", style="color:var(--text-mute);")
-        rows_.append(Tr(Td(f"{r['first_name']} {r['last_name']}"), Td(r["dept"] or "Puudub"),
+            act = Span(t_app(lang, "app_missing_value"), style="color:var(--text-mute);")
+        rows_.append(Tr(Td(f"{r['first_name']} {r['last_name']}"),
+                        Td(r["dept"] or t_app(lang, "app_missing_value")),
                         Td(_pill(r["leave_type"])),
                         Td(f"{r['from_date']} → {r['to_date']}", style="white-space:nowrap;"),
                         Td(str(r["days"]), cls="num"), Td(_pill(r["status"])), Td(act)))
-    tbl = Table(Thead(Tr(Th("Töötaja"), Th("Osakond"), Th("Liik"), Th("Kuupäevad"), Th("Päevad", cls="num"), Th("Staatus"), Th("Tegevus"))),
-                Tbody(*rows_ or [Tr(Td("Taotlusi pole.", colspan="7"))]), cls="tbl")
+    tbl = Table(Thead(Tr(Th(t_app(lang, "leave_employee")), Th(t_app(lang, "leave_department")),
+                       Th(t_app(lang, "leave_type")), Th(t_app(lang, "leave_dates")),
+                       Th(t_app(lang, "leave_days"), cls="num"), Th(t_app(lang, "leave_status")),
+                       Th(t_app(lang, "leave_action")))),
+                Tbody(*rows_ or [Tr(Td(t_app(lang, "leave_empty"), colspan="7"))]), cls="tbl")
     return Div(_apply_form(), seg, Div(tbl, cls="card"))
 
 
 def leave_list(status="Pending"):
-    return _title("Puhkuse taotlused"), Div(leave_main(status), id="leave-main")
+    lang = current_lang()
+    return _title(t_app(lang, "leave_title")), Div(leave_main(status), id="leave-main")
 
 
 # ---------- attendance ------------------------------------------------------
 
 def attendance_view():
+    lang = current_lang()
     today = db.TODAY.isoformat()
     reg = db.rows("""SELECT e.first_name,e.last_name,d.name dept,a.status,a.hours FROM attendance a
                      JOIN employees e ON e.id=a.employee_id LEFT JOIN departments d ON d.id=e.dept_id
@@ -234,11 +245,13 @@ def attendance_view():
     for r in reg:
         counts[r["status"]] = counts.get(r["status"], 0) + 1
     kpis = Div(*[kpi_card(s, counts.get(s, 0)) for s in db.ATTEND_STATUSES[:4]], cls="kpi-grid")
-    tbl = Table(Thead(Tr(Th("Töötaja"), Th("Osakond"), Th("Staatus"), Th("Tunnid", cls="num"))),
+    tbl = Table(Thead(Tr(Th(t_app(lang, "table_employee")), Th(t_app(lang, "table_department")),
+                       Th(t_app(lang, "attendance_status")), Th(t_app(lang, "attendance_hours"), cls="num"))),
                 Tbody(*[Tr(Td(f"{r['first_name']} {r['last_name']}"), Td(r["dept"] or "Puudub"),
                            Td(_pill(r["status"])), Td(f"{r['hours']:.1f}" if r["hours"] else "Puudub", cls="num"))
-                        for r in reg] or [Tr(Td("Tänaseid kohalolekuid pole.", colspan="4"))]), cls="tbl")
-    return _title("Kohalolek", f"Täna: {today}"), kpis, Div(Div(H3("Tänane register"), cls="card-header"), tbl, cls="card")
+                        for r in reg] or [Tr(Td(t_app(lang, "attendance_empty"), colspan="4"))]), cls="tbl")
+    return (_title(t_app(lang, "attendance_title"), t_app(lang, "attendance_subtitle").format(today=today)),
+            kpis, Div(Div(H3(t_app(lang, "attendance_today_register")), cls="card-header"), tbl, cls="card"))
 
 
 # ---------- shifts and time clocks -----------------------------------------
@@ -252,6 +265,7 @@ def _week_start(value=None):
 
 
 def shifts_roster(week=""):
+    lang = current_lang()
     start = _week_start(week)
     days = [start + timedelta(days=i) for i in range(7)]
     end = days[-1]
@@ -272,28 +286,29 @@ def shifts_roster(week=""):
                                   href=f"/shifts?week={start.isoformat()}",
                                   style=f"border-left:3px solid {s['color'] or 'var(--accent)'};"),
                              _pill(s["status"]),
-                             Form(Button("Tühista", type="submit", cls="btn sm"), method="post",
+                             Form(Button(t_app(lang, "shifts_cancel"), type="submit", cls="btn sm"), method="post",
                                   action=f"/shifts/{s['id']}/cancel") if s["status"] in ("Scheduled", "Missed") else None,
-                             cls="note") for s in shifts] or [Span("Puudub", cls="sub")]))
+                             cls="note") for s in shifts] or [Span(t_app(lang, "app_missing_value"), cls="sub")]))
         rows_.append(Tr(Td(Strong(_name(emp))), *cells))
-    table = Table(Thead(Tr(Th("Töötaja"), *[Th(f"{d:%a}<br>{d:%d %b}", cls="num") for d in days])),
-                  Tbody(*rows_ or [Tr(Td("Sel nädalal vahetusi pole.", colspan="8"))]), cls="tbl")
+    table = Table(Thead(Tr(Th(t_app(lang, "table_employee")), *[Th(f"{d:%a}<br>{d:%d %b}", cls="num") for d in days])),
+                  Tbody(*rows_ or [Tr(Td(t_app(lang, "shifts_missing"), colspan="8"))]), cls="tbl")
     types = db.shift_types()
     emps = db.employees_min()
-    form = Form(Select(*[Option(_name(e), value=str(e["id"])) for e in emps], name="employee_id", required=True, cls="hr-inp", aria_label="Töötaja"),
-                Select(*[Option(t["name"], value=str(t["id"])) for t in types], name="shift_type_id", required=True, cls="hr-inp", aria_label="Vahetuse liik"),
-                Input(type="date", name="shift_date", value=db.TODAY.isoformat(), required=True, cls="hr-inp", aria_label="Vahetuse kuupäev"),
-                Input(name="location_label", placeholder="Asukoht, näiteks Tallinna kontor", cls="hr-inp"),
-                Button("Loo vahetus", type="submit", cls="btn primary"), method="post", action="/shifts/new")
+    form = Form(Select(*[Option(_name(e), value=str(e["id"])) for e in emps], name="employee_id", required=True, cls="hr-inp", aria_label=t_app(lang, "table_employee")),
+                Select(*[Option(t["name"], value=str(t["id"])) for t in types], name="shift_type_id", required=True, cls="hr-inp", aria_label=t_app(lang, "shifts_type")),
+                Input(type="date", name="shift_date", value=db.TODAY.isoformat(), required=True, cls="hr-inp", aria_label=t_app(lang, "shifts_date")),
+                Input(name="location_label", placeholder=t_app(lang, "shifts_location_placeholder"), cls="hr-inp"),
+                Button(t_app(lang, "shifts_create"), type="submit", cls="btn primary"), method="post", action="/shifts/new")
     prev_week, next_week = (start - timedelta(days=7)).isoformat(), (start + timedelta(days=7)).isoformat()
-    return (_title("Vahetused ja töögraafik", f"Nädal: {start.isoformat()} kuni {end.isoformat()}",
-                   A("← Eelmine", href=f"/shifts?week={prev_week}", cls="btn"),
-                   A("Järgmine →", href=f"/shifts?week={next_week}", cls="btn")),
-            Div(Div(H3("Nädala töögraafik"), cls="card-header"), table, cls="card"),
-            Div(Div(H3("Uus vahetus"), P("Lisa graafikusse uus vahetus.", cls="sub"), cls="card-header"), form, cls="card"))
+    return (_title(t_app(lang, "shifts_title"), t_app(lang, "shifts_week").format(start=start.isoformat(), end=end.isoformat()),
+                   A(t_app(lang, "shifts_previous"), href=f"/shifts?week={prev_week}", cls="btn"),
+                   A(t_app(lang, "shifts_next"), href=f"/shifts?week={next_week}", cls="btn")),
+            Div(Div(H3(t_app(lang, "shifts_week_schedule")), cls="card-header"), table, cls="card"),
+            Div(Div(H3(t_app(lang, "shifts_new_title")), P(t_app(lang, "shifts_new_subtitle"), cls="sub"), cls="card-header"), form, cls="card"))
 
 
 def time_clocks():
+    lang = current_lang()
     today = db.TODAY.isoformat()
     employees = db.employees_min()
     punches = db.rows("""SELECT p.*, e.first_name,e.last_name FROM clock_punches p
@@ -304,31 +319,36 @@ def time_clocks():
         latest[punch["employee_id"]] = punch
     def state_for(eid):
         kind = latest.get(eid, {}).get("punch_type")
-        return {"In": "Tööaeg alustatud", "Break Start": "Pausil", "Break End": "Tööaeg alustatud",
-                "Out": "Tööaeg lõpetatud"}.get(kind, "Märge puudub")
+        return {"In": t_app(lang, "timeclock_state_started"),
+                "Break Start": t_app(lang, "timeclock_state_break"),
+                "Break End": t_app(lang, "timeclock_state_started"),
+                "Out": t_app(lang, "timeclock_state_ended")}.get(kind, t_app(lang, "timeclock_state_missing"))
 
-    board = Table(Thead(Tr(Th("Töötaja"), Th("Olek"), Th("Viimane märge"), Th("Allikas"))),
+    board = Table(Thead(Tr(Th(t_app(lang, "table_employee")), Th(t_app(lang, "timeclock_state")),
+                           Th(t_app(lang, "timeclock_last_entry")), Th(t_app(lang, "timeclock_source")))),
                   Tbody(*[Tr(Td(_name(e)), Td(_pill(state_for(e["id"]))),
-                           Td(latest[e["id"]]["punched_at"] if e["id"] in latest else "Puudub"),
-                           Td(latest[e["id"]]["source"] if e["id"] in latest else "Puudub")) for e in employees]
-                  or [Tr(Td("Töötajaid pole.", colspan="4"))]), cls="tbl")
+                           Td(latest[e["id"]]["punched_at"] if e["id"] in latest else t_app(lang, "app_missing_value")),
+                           Td(latest[e["id"]]["source"] if e["id"] in latest else t_app(lang, "app_missing_value"))) for e in employees]
+                  or [Tr(Td(t_app(lang, "timeclock_no_employees"), colspan="4"))]), cls="tbl")
     selector = Select(*[Option(_name(e), value=str(e["id"])) for e in employees], name="employee_id", required=True, cls="hr-inp")
-    widget = Div(Form(selector, Input(type="hidden", name="source", value="Veeb"), Button("Alusta tööaega", type="submit", cls="btn primary"),
+    widget = Div(Form(selector, Input(type="hidden", name="source", value="Web"), Button(t_app(lang, "timeclock_start"), type="submit", cls="btn primary"),
                       method="post", action="/timeclock/in"),
                  Form(Select(*[Option(_name(e), value=str(e["id"])) for e in employees], name="employee_id", required=True, cls="hr-inp"),
-                      Button("Lõpeta tööaeg", type="submit", cls="btn"), method="post", action="/timeclock/out"), cls="actions")
-    recent = Table(Thead(Tr(Th("Töötaja"), Th("Tüüp"), Th("Aeg"), Th("Asukoht"))),
+                      Button(t_app(lang, "timeclock_end"), type="submit", cls="btn"), method="post", action="/timeclock/out"), cls="actions")
+    recent = Table(Thead(Tr(Th(t_app(lang, "table_employee")), Th(t_app(lang, "timeclock_type")),
+                           Th(t_app(lang, "timeclock_time")), Th(t_app(lang, "timeclock_location")))),
                    Tbody(*[Tr(Td(_name(p)), Td(_pill(p["punch_type"])), Td(p["punched_at"]),
-                              Td("Kohapeal" if p["on_site"] else ("Eemal" if p["on_site"] == 0 else "Puudub"))) for p in punches[:20]] or
-                          [Tr(Td("Täna pole tööaja märkmeid.", colspan="4"))]), cls="tbl")
+                              Td(t_app(lang, "timeclock_on_site") if p["on_site"] else (t_app(lang, "timeclock_off_site") if p["on_site"] == 0 else t_app(lang, "app_missing_value")))) for p in punches[:20]] or
+                          [Tr(Td(t_app(lang, "timeclock_no_entries"), colspan="4"))]), cls="tbl")
     gaps = db.auto_attendance_gap_report((db.TODAY - timedelta(days=7)).isoformat(), today)
     gap_list = [Tr(Td(_name(g)), Td(g["shift_date"]), Td(g["shift_name"])) for g in gaps]
-    return (_title("Tööaja märkimine", f"Tänane ülevaade: {today}"),
-            Div(Div(H3("Märgi tööaeg"), widget, cls="card-header"), P("Vali töötaja, kelle tööaega märgid."), cls="card"),
-            Div(Div(H3("Tänane tööaja ülevaade"), cls="card-header"), board, cls="card"),
-            Div(Div(H3("Viimased märked"), cls="card-header"), recent, cls="card"),
-            Div(Div(H3("Puuduvad tööaja märked"), P("Graafikus on vahetus, kuid tööaega pole alustatud.", cls="sub"), cls="card-header"),
-                Table(Thead(Tr(Th("Töötaja"), Th("Kuupäev"), Th("Vahetus"))), Tbody(*gap_list or [Tr(Td("Puudumisi ei leitud.", colspan="3"))]), cls="tbl"), cls="card"))
+    return (_title(t_app(lang, "timeclock_title"), t_app(lang, "timeclock_subtitle").format(today=today)),
+            Div(Div(H3(t_app(lang, "timeclock_mark")), widget, cls="card-header"), P(t_app(lang, "timeclock_mark_help")), cls="card"),
+            Div(Div(H3(t_app(lang, "timeclock_today_overview")), cls="card-header"), board, cls="card"),
+            Div(Div(H3(t_app(lang, "timeclock_recent")), cls="card-header"), recent, cls="card"),
+            Div(Div(H3(t_app(lang, "timeclock_missing_entries")), P(t_app(lang, "timeclock_missing_help"), cls="sub"), cls="card-header"),
+                Table(Thead(Tr(Th(t_app(lang, "table_employee")), Th(t_app(lang, "table_dates")), Th(t_app(lang, "timeclock_shift")))),
+                      Tbody(*gap_list or [Tr(Td(t_app(lang, "timeclock_no_gaps"), colspan="3"))]), cls="tbl"), cls="card"))
 
 
 # ---------- payroll ---------------------------------------------------------

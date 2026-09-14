@@ -2,6 +2,17 @@
 
 Product changes are listed newest first. This file must remain synchronized with `docs/product_roadmap.md` under the rule documented there and in `AGENTS.md`.
 
+## 2026-09-14 — Admin time-section pages in Estonian and English
+
+### Added
+
+- Localized the admin leave, attendance, shifts and roster, and time-clock pages through the shared app i18n copy. Canonical leave types, approval statuses and seed data remain unchanged.
+- Added bilingual coverage for the four time-section page groups; payroll, benefits, expenses, travel, the employee portal and talent module remain unchanged.
+
+### Verification
+
+- Added `test_time_section_pages_render_both_app_languages`; full suite verification is recorded with the pull request.
+
 ## 2026-09-14 — Employee self-service portal content in Estonian and English
 
 ### Added
