@@ -45,8 +45,8 @@ def test_roles_settings_is_bilingual_and_requires_login(fresh_db):
     import web_app
     from web import settings
 
-    assert "Vaata" in str(settings.roles_page(lang="et"))
-    assert "View" in str(settings.roles_page(lang="en"))
+    assert "Vaata" in str(settings.permissions_matrix())
+    assert "Vaata" in str(settings.roles_page())
     response = web_app._guard({}, "roles", settings.roles_page)
     assert isinstance(response, RedirectResponse)
     assert "/login" in response.headers["location"]
@@ -780,9 +780,9 @@ def test_lifecycle_pages_render_estonian_copy(fresh_db):
     assert "Sisemised muudatused" in str(lifecycle.changes_page())
     assert "Lahkumised" in str(lifecycle.separations_page())
     assert "Vilistlased" in str(lifecycle.alumni_page())
-    assert "Töösuhted" in str(lifecycle.cases_page())
-    assert "Org-struktuur" in str(lifecycle.org_page())
-    for needle in ("Onboarding", "Internal changes", "Separations", "Employee relations",
+    assert "Juhtumid" in str(lifecycle.cases_page())
+    assert "Organisatsioon" in str(lifecycle.org_page())
+    for needle in ("Onboarding", "Internal changes", "Departures", "Employee relations",
                    "Org chart", "No changes recorded"):
         assert needle not in str(lifecycle.changes_page())
     assert "Tunnid" in str(views.attendance_view())
@@ -910,7 +910,6 @@ def test_time_section_pages_render_both_app_languages(fresh_db):
     for path, heading in english_pages.items():
         assert heading in client.get(f"{path}?lang=en").text
 
-
 def test_pay_benefits_expenses_and_travel_pages_render_both_app_languages(fresh_db):
     from starlette.testclient import TestClient
 
@@ -941,3 +940,60 @@ def test_pay_benefits_expenses_and_travel_pages_render_both_app_languages(fresh_
         assert heading in client.get(path).text
     for path, heading in english_pages.items():
         assert heading in client.get(f"{path}?lang=en").text
+
+def test_lifecycle_performance_and_settings_pages_render_both_app_languages(fresh_db):
+    from starlette.testclient import TestClient
+
+    import web_app
+
+    client = TestClient(web_app.app)
+    client.post("/login", data={"email": web_app.VALID_EMAIL,
+                                "password": web_app.VALID_PASSWORD})
+
+    estonian_pages = {
+        "/lifecycle/onboarding": "Sisseelamine",
+        "/lifecycle/changes": "Sisemised muudatused",
+        "/lifecycle/separations": "Lahkumised",
+        "/lifecycle/alumni": "Vilistlased",
+        "/lifecycle/cases": "Juhtumid",
+        "/lifecycle/org": "Organisatsioon",
+        "/performance/goals": "Eesmärgid ja OKR-id",
+        "/performance/feedback": "Tagasiside",
+        "/performance/reviews": "Hindamisperioodid",
+        "/performance/signals": "Tulemuslikkuse signaalid",
+        "/settings/integrations": "Integratsioonid",
+        "/settings/roles": "Rollid",
+        "/settings/roles/permissions": "Moodulite õigused",
+    }
+    english_pages = {
+        "/lifecycle/onboarding": "Onboarding",
+        "/lifecycle/changes": "Internal changes",
+        "/lifecycle/separations": "Departures",
+        "/lifecycle/alumni": "Alumni",
+        "/lifecycle/cases": "Cases",
+        "/lifecycle/org": "Organization",
+        "/performance/goals": "Goals &amp; OKRs",
+        "/performance/feedback": "Feedback",
+        "/performance/reviews": "Review cycles",
+        "/performance/signals": "Performance signals",
+        "/settings/integrations": "Integrations",
+        "/settings/roles": "Roles",
+        "/settings/roles/permissions": "Module permissions",
+    }
+    for path, heading in estonian_pages.items():
+        assert heading in client.get(path).text
+    for path, heading in english_pages.items():
+        assert heading in client.get(f"{path}?lang=en").text
+
+    surfaces = {
+        "/lifecycle/onboarding": (("Uus töötaja", "Hilinenud"), ("New employee", "Overdue")),
+        "/performance/reviews": (("Hindamisperiood", "Loo"), ("Cycle", "Create")),
+        "/settings/integrations": (("Ühendatud", "Seadista"), ("Connected", "Configure")),
+    }
+    for path, (et_needles, en_needles) in surfaces.items():
+        et = client.get(f"{path}?lang=et").text
+        en = client.get(f"{path}?lang=en").text
+        for needle in et_needles:
+            assert needle in et
+        for needle in en_needles:
+            assert needle in en

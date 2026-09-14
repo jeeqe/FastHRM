@@ -63,6 +63,7 @@ def t(lang: str) -> dict:
 
 COPY = {
     "et": {
+        "rbac_title": "Rollid", "rbac_subtitle": "Määra rollidele moodulite vaatamise ja muutmise õigused.", "rbac_permissions": "Moodulite õigused", "rbac_role": "Roll", "rbac_view": "Vaata", "rbac_edit": "Muuda", "rbac_save": "Salvesta õigused", "rbac_unconfigured": "Tühjad moodulid järgivad senist ligipääsu.",
         "html_lang": "et",
         "meta_title": "FastHR · Eesti personalitöö ja palgaarvestus",
         "meta_desc": "Töötajad, puudumised, Eesti palgaarvestus (TÖR, TSD) ja "
@@ -343,6 +344,7 @@ COPY = {
         },
     },
     "en": {
+        "rbac_title": "Roles", "rbac_subtitle": "Set module-level viewing and editing rights for each role.", "rbac_permissions": "Module permissions", "rbac_role": "Role", "rbac_view": "View", "rbac_edit": "Edit", "rbac_save": "Save permissions", "rbac_unconfigured": "Unconfigured modules keep the previous access behaviour.",
         "html_lang": "en",
         "meta_title": "FastHR · Estonian HR & payroll, open source",
         "meta_desc": "Employee records, leave, Estonian statutory payroll (TÖR, TSD) "
@@ -629,6 +631,7 @@ COPY = {
 
 APP_COPY = {
     "et": {
+        "rbac_title": "Rollid", "rbac_subtitle": "Määra rollidele moodulite vaatamise ja muutmise õigused.", "rbac_permissions": "Moodulite õigused", "rbac_role": "Roll", "rbac_view": "Vaata", "rbac_edit": "Muuda", "rbac_save": "Salvesta õigused", "rbac_unconfigured": "Tühjad moodulid järgivad senist ligipääsu.",
         "nav_overview": "ÜLEVAADE",
         "nav_people": "INIMESED",
         "nav_time": "AEG",
@@ -833,8 +836,13 @@ APP_COPY = {
         "benefits_category": "Kategooria", "benefits_enrolled": "Registreerunud", "benefits_empty": "Soodustusi pole.",
         "benefits_employee": "Töötaja", "benefits_enrolment": "Töötajate registreerimine",
         "benefits_no_employees": "Aktiivseid töötajaid pole.", "benefits_subtitle": "Tööandjapoolsed soodustused: registreerimine ja kulu",
+        "lc_onboarding": "Sisseelamine", "lc_onboarding_subtitle": "Kontrollnimekirjad algavad automaatselt pakkumise vastuvõtmisel", "lc_changes": "Sisemised muudatused", "lc_changes_subtitle": "Edutamised, üleviimised ja rollimuudatused — kinnitatud, kuupäevaga ja auditeeritud", "lc_departures": "Lahkumised", "lc_departures_subtitle": "Etteteatamine, üleandmine, lahkumisintervjuu ja vilistlasstaatus", "lc_alumni": "Vilistlased", "lc_alumni_subtitle": "Endised kolleegid — odavaim hea värbamise allikas", "lc_cases": "Juhtumid", "lc_cases_subtitle": "Kaebused, heaolu ja käitumine — piiratud nähtavus, täielik audit", "lc_org": "Organisatsioon",
+        "lc_in_progress": "Pooleli", "lc_employee_not_found": "Töötajat ei leitud", "lc_no_employee": "Sellist töötajat pole.", "lc_propose": "Tee ettepanek", "lc_register_departure": "Registreeri lahkuja", "lc_exit_interview": "Lahkumisintervjuu", "lc_effective_from": "Kehtib alates", "lc_from_to": "Kust → kuhu", "lc_reason": "Põhjus", "lc_missing": "Puudub",
+        "perf_goals": "Eesmärgid ja OKR-id", "perf_alignment": "Eesmärkide hierarhia", "perf_add_goal": "Lisa eesmärk", "perf_goal_not_found": "Eesmärki ei leitud", "perf_no_goal": "Sellist eesmärki pole.", "perf_no_cycle": "Sellist hindamisperioodi pole.", "perf_check_in": "Uuenda eesmärki", "perf_checkin_history": "Progressi ajalugu", "perf_contributing_goals": "Alameesmärgid", "perf_goal_alignment": "Eesmärgi sidumine", "perf_cascade": "Kaskaad", "perf_give_feedback": "Anna tagasisidet", "perf_feedback": "Tagasiside", "perf_recent_feedback": "Hiljutine tagasiside", "perf_new_cycle": "Uus hindamisperiood", "perf_cycles": "Hindamisperioodid", "perf_cycle_not_found": "Hindamisperioodi ei leitud", "perf_cycle_subtitle": "Isehindamine, juhi ja ülemjuhi hindamine koos kalibreerimisega", "perf_calibration": "Kalibreerimine osakonniti", "perf_when": "Millal", "perf_value": "Väärtus", "perf_status": "Olek", "perf_note": "Märkus", "perf_by": "Lisaja", "perf_overall": "Kokkuvõtlik hinnang", "perf_reviewer": "Hindaja", "perf_kind": "Liik", "perf_employee": "Töötaja", "perf_department": "Osakond", "perf_feedback_subtitle": "kiitus, juhendamine ja kolleegide hinnangud", "perf_signals": "Tulemuslikkuse signaalid",
+        "settings_integrations": "Integratsioonid", "settings_recent_activity": "Hiljutine integratsioonide tegevus", "settings_account": "Konto", "settings_role": "Roll", "settings_scope": "Ulatus", "settings_linked_employee": "Seotud töötaja", "settings_assign_role": "Määra roll", "settings_assigned_roles": "Määratud rollid ({n})", "settings_role_purpose": "Rollide kirjeldused", "settings_intended_access": "Eesmärk ja ligipääs", "settings_connection": "Ühendus", "settings_credentials": "Mandaadid", "settings_activity": "Tegevus", "settings_when": "Millal", "settings_provider": "Pakkuja", "settings_event": "Sündmus", "settings_result": "Tulemus", "settings_detail": "Detail", "settings_unknown": "Tundmatu integratsioon", "settings_no_provider": "Sellist pakkujat pole.",
     },
     "en": {
+        "rbac_title": "Roles", "rbac_subtitle": "Set module-level viewing and editing rights for each role.", "rbac_permissions": "Module permissions", "rbac_role": "Role", "rbac_view": "View", "rbac_edit": "Edit", "rbac_save": "Save permissions", "rbac_unconfigured": "Unconfigured modules keep the previous access behaviour.",
         "nav_overview": "OVERVIEW",
         "nav_people": "PEOPLE",
         "nav_time": "TIME",
@@ -1023,8 +1031,87 @@ APP_COPY = {
         "benefits_name": "Name", "benefits_category": "Category", "benefits_enrolled": "Enrolled", "benefits_empty": "No benefit plans.",
         "benefits_employee": "Employee", "benefits_enrolment": "Employee enrolment", "benefits_no_employees": "No active employees.",
         "benefits_subtitle": "Eligibility, enrolment and employer contribution tracking",
+        "lc_onboarding": "Onboarding", "lc_onboarding_subtitle": "Checklists start automatically when an offer is accepted", "lc_changes": "Internal changes", "lc_changes_subtitle": "Promotions, transfers and role changes — approved, dated and audited", "lc_departures": "Departures", "lc_departures_subtitle": "Notice, handover, exit interview and alumni status", "lc_alumni": "Alumni", "lc_alumni_subtitle": "Former colleagues — the cheapest good recruiting source", "lc_cases": "Cases", "lc_cases_subtitle": "Complaints, wellbeing and conduct — restricted visibility, complete audit", "lc_org": "Organization",
+        "perf_goals": "Goals & OKRs", "perf_alignment": "Alignment tree", "perf_add_goal": "Add a goal", "perf_goal_not_found": "Goal not found", "perf_no_goal": "No such goal.", "perf_no_cycle": "No such review cycle.", "perf_check_in": "Check in", "perf_checkin_history": "Check-in history", "perf_contributing_goals": "Contributing goals", "perf_goal_alignment": "Goal alignment", "perf_cascade": "Cascade", "perf_give_feedback": "Give feedback", "perf_feedback": "Feedback", "perf_recent_feedback": "Recent feedback", "perf_new_cycle": "New review cycle", "perf_cycles": "Review cycles", "perf_cycle_not_found": "Cycle not found", "perf_cycle_subtitle": "Self, manager and skip-level reviews with calibration", "perf_calibration": "Calibration by department", "perf_when": "When", "perf_value": "Value", "perf_status": "Status", "perf_note": "Note", "perf_by": "By", "perf_overall": "Overall", "perf_reviewer": "Reviewer", "perf_kind": "Kind", "perf_employee": "Employee", "perf_department": "Department", "perf_feedback_subtitle": "praise, coaching and peer review", "perf_signals": "Performance signals",
+        "settings_integrations": "Integrations", "settings_recent_activity": "Recent integration activity", "settings_account": "Account", "settings_role": "Role", "settings_scope": "Scope", "settings_linked_employee": "Linked employee", "settings_assign_role": "Assign a role", "settings_assigned_roles": "Assigned roles ({n})", "settings_role_purpose": "What each role is for", "settings_intended_access": "Intended access", "settings_connection": "Connection", "settings_credentials": "Credentials", "settings_activity": "Activity", "settings_when": "When", "settings_provider": "Provider", "settings_event": "Event", "settings_result": "Result", "settings_detail": "Detail", "settings_unknown": "Unknown integration", "settings_no_provider": "No such provider.",
     },
 }
+
+# Copy used by the lifecycle, performance and settings renderers.  Kept in
+# the authenticated-app dictionary so these pages can never silently fall
+# back to a source-language literal when the language switch is used.
+APP_COPY["et"].update({
+    "lc_org_subtitle": "Alluvussuhted, meeskondade suurused ja personalikulude stsenaariumid",
+    "lc_kpi_overdue": "{n} hilinenud ülesannet", "lc_kpi_pending": "Ootel muudatused",
+    "lc_kpi_awaiting": "ootab kinnitamist", "lc_kpi_in_progress": "pooleli",
+    "lc_kpi_cases": "Avatud juhtumid", "lc_kpi_alumni": "{n} vilistlast",
+    "lc_new_employee": "Uus töötaja", "lc_start": "Alustab", "lc_tasks": "Ülesandeid",
+    "lc_progress": "Edenemine", "lc_overdue": "Hilinenud", "lc_status": "Staatus", "lc_change": "Muudatus", "lc_kind": "Liik", "lc_notice": "Teavitus", "lc_last_day": "Viimane päev", "lc_severity": "Raskusaste", "lc_visibility": "Nähtavus", "lc_open": "Ava", "table_name": "Nimi",
+    "lc_empty_onboarding": "Hetkel pole kedagi sisseelamisel.",
+    "lc_back_onboarding": "← Sisseelamine", "lc_toggle": "Lülita",
+    "lc_due": "tähtaeg", "lc_done": "tehtud", "lc_checklist": "Kontrollnimekiri — {done} / {total} tehtud",
+    "lc_no_checklist": "Sellel töötajal pole kontrollnimekirja.",
+    "lc_approve": "✓ Kinnita", "lc_reject": "✕ Lükka tagasi", "lc_action": "Tegevus",
+    "lc_empty_changes": "Muudatusi pole registreeritud.", "lc_propose": "Tee ettepanek",
+    "lc_new_title": "Uus ametinimetus", "lc_new_salary": "Uus palk", "lc_keep_department": "— jäta osakond —",
+    "lc_empty_departures": "Lahkumisi pole registreeritud.", "lc_register_departure": "Registreeri lahkuja",
+    "lc_separation_kind": "Lahkumisliik", "lc_notice_date": "Teavituse kuupäev",
+    "lc_last_workday": "Viimane tööpäev", "lc_departure_start": "Alusta", "lc_not_found": "Lahkumist ei leitud",
+    "lc_no_record": "Sellist kirjet pole.", "lc_departure": "Lahkuja", "lc_notified": "Teavitatud",
+    "lc_alumni": "Vilistlane", "lc_exit_interview": "Lahkumisintervjuu",
+    "lc_exit_prompt": "Mis toimis, mis mitte, kas tuleks tagasi?", "lc_sentiment": "Meelsus",
+    "lc_empty_checklist": "Nimekirja pole.", "lc_last_role": "Viimane roll", "lc_left": "Lahkus",
+    "lc_rehire": "Tagasivõtt", "lc_empty_alumni": "Vilistlasi pole veel.", "lc_open_cases": "Avatud juhtumeid pole.",
+    "lc_open_case": "Ava juhtum", "lc_confidential": "— konfidentsiaalne / nimeta —", "lc_case_kind": "Juhtumi liik",
+    "lc_summary": "Kokkuvõte",
+    "lc_company": "Kogu ettevõte", "lc_delta": "+/- töötajat", "lc_model": "Modelleeri", "lc_model_button": "Modelleeri",
+    "lc_people_scenario": "Töötajate stsenaarium", "lc_org_chart": "Alluvusstruktuur", "lc_no_change": "muutusteta",
+    "lc_people": "inimest", "lc_save": "Salvesta",
+    "perf_active_goals": "Aktiivsed eesmärgid", "perf_at_risk": "{n} riskis või maha jäänud",
+    "perf_feedback_30d": "Tagasiside (30 p)", "perf_pieces": "vahetatud teadet", "perf_open_cycles": "Avatud hindamisperioodid",
+    "perf_reviews_due": "Hindamised ootel", "perf_not_submitted": "veel esitamata", "perf_alignment": "Sidumine",
+    "perf_add_goal": "Lisa eesmärk", "perf_add_a_goal": "Lisa eesmärk", "perf_save_checkin": "Salvesta vahekokkuvõte",
+    "perf_post": "Postita", "perf_open_cycle": "Ava hindamisperiood", "perf_calibrate": "Kalibreeri", "perf_create": "Loo",
+    "perf_submit_review": "Esita hindamine", "perf_goal_list": "← Eesmärkide loend", "perf_alignment_link": "Eesmärkide sidumine →",
+    "perf_checkin": "Uuenda eesmärki", "perf_when": "Millal", "perf_value": "Väärtus", "perf_note": "Märkus", "perf_by": "Lisaja",
+    "perf_no_match": "Eesmärkidele vastet ei leitud.", "perf_none_linked": "Selle eesmärgiga pole seotud eesmärke.",
+    "perf_no_goals": "Eesmärke pole veel.", "perf_no_feedback": "Tagasisidet pole veel.", "perf_nothing_submitted": "Midagi pole veel esitatud.",
+    "perf_review_not_found": "Hindamist ei leitud", "perf_no_such_review": "Sellist hindamist pole.", "perf_shown": "{n} kuvatud — ettevõte → meeskond → individuaalne",
+    "perf_entries": "{n} kirjet", "perf_target": "Siht", "perf_current": "Praegune", "perf_period": "Periood", "perf_due": "Tähtaeg",
+    "perf_parent": "Ülem-eesmärk", "perf_of_target": "{n}% sihist", "perf_current_value": "Praegune väärtus", "perf_changed": "Mis muutus?",
+    "perf_no_checkins": "Vahekokkuvõtteid pole veel.", "perf_contributing": "Kaasa aitavad eesmärgid ({n})",
+    "perf_no_cycle": "Sellist hindamisperioodi pole.", "perf_cycle": "Hindamisperiood", "perf_reviews": "Hindamised",
+    "perf_submitted": "Esitatud", "perf_complete": "Lõpeta", "perf_review": "Hindamine", "perf_rating": "Hinnangute jaotus",
+    "perf_overall_summary": "Kokkuvõte", "perf_outstanding": "Suurepärane", "perf_exceeds": "Ületab ootusi", "perf_meets": "Vastab ootustele",
+    "perf_developing": "Arendamisel", "perf_below": "Alla ootuste", "perf_review_prompt": "Mis läks hästi ja millele järgmisena keskenduda?",
+    "perf_signals_explanation": "Signaalid põhinevad eesmärkide edenemisel, kohalolekul, tagasiside värskusel ja staažil. Iga signaal näitab selle aluseks olevaid tegureid — seletamatuid hindeid ei ole ning siinset infot ei tohiks kasutada ilma vestluseta.",
+    "perf_attrition": "Lahkumisriskide signaalid", "perf_advisory": "ainult soovituslik", "perf_signal": "Signaal", "perf_why": "Põhjus",
+    "perf_no_signals": "Signaale pole tõstetud — hea uudis.", "perf_readiness": "Edutamise valmidus", "perf_no_data": "Andmeid pole veel piisavalt.", "perf_score": "Hinne",
+    "settings_connect_subtitle": "Ühenda FastHR tööportaalide, kalendrite ja tööriistadega, mida juba kasutad.",
+    "settings_connected": "Ühendatud", "settings_available": "saadaval {n}-st", "settings_attention": "Vajab tähelepanu",
+    "settings_failed_test": "ühenduse test ebaõnnestus", "settings_not_configured": "Seadistamata", "settings_no_credentials": "mandaate pole salvestatud",
+    "settings_providers": "Pakkujad", "settings_categories": "7 kategoorias", "settings_no_key": "Võtit pole salvestatud",
+    "settings_configure": "Seadista", "settings_test": "Testi otseühendust", "settings_sync": "Sünkrooni nüüd",
+    "settings_encryption_notice": "Võtmed krüpteeritakse rakenduse saladusega ja neid ei kuvata kunagi täies pikkuses. Näidatakse ainult nelja viimast märki. <code>FASTHR_SECRET</code> muutmine muudab salvestatud mandaadid kehtetuks ja need tuleb uuesti sisestada.",
+    "settings_remove": "Eemalda", "settings_no_roles": "Ühtegi rolli pole veel määratud.", "settings_all_data": "Kõik andmed", "settings_own_department": "Oma osakond", "settings_themselves": "Ainult ise", "settings_link_optional": "— seo töötajaga (valikuline) —", "settings_assign": "Määra roll",
+    "settings_role_notice": "Rollid salvestatakse siin ja neid näidatakse kogu auditijäljes. <strong>Reataseme jõustamine pole päringukihis veel ühendatud</strong>. Kõik sisseloginud kasutajad näevad endiselt kõiki andmeid. Rollide määramine tähendab praegu, et jõustamiskihil on reaalsed määrangud, mida rakendada.",
+    "settings_stored_hint": "Salvestatud krüpteeritult. Praeguse väärtuse säilitamiseks jäta väli tühjaks.", "settings_account_ref": "Konto või organisatsiooni viide (valikuline)", "settings_account_ref_hint": "nt ettevõtte leht või teenusepakkuja konto ID", "settings_auto_sync": "Sünkrooni pärast ühendamist automaatselt", "settings_save_credentials": "Salvesta mandaadid", "settings_disconnect": "Katkesta ühendus ja kustuta salvestatud mandaadid", "settings_last_tested": "Viimati testitud", "settings_last_sync": "Viimane sünkroonimine", "settings_auto": "Automaatne sünkroonimine", "settings_on": "Sees", "settings_off": "Väljas", "settings_not_set": "— määramata", "settings_never": "mitte kunagi", "settings_connection": "Ühendus", "settings_provider_label": "Pakkuja", "settings_category": "Kategooria",
+})
+APP_COPY["en"].update({
+    "lc_org_subtitle": "Reporting lines, team sizes and workforce cost scenarios", "lc_kpi_overdue": "{n} overdue tasks", "lc_kpi_pending": "Pending changes", "lc_kpi_awaiting": "awaiting approval", "lc_kpi_in_progress": "in progress", "lc_kpi_cases": "Open cases", "lc_kpi_alumni": "{n} alumni", "lc_new_employee": "New employee", "lc_start": "Starts", "lc_tasks": "Tasks", "lc_progress": "Progress", "lc_overdue": "Overdue", "lc_status": "Status", "lc_empty_onboarding": "No one is onboarding right now.", "lc_back_onboarding": "← Onboarding", "lc_toggle": "Toggle", "lc_due": "due", "lc_done": "done", "lc_checklist": "Checklist — {done} / {total} done", "lc_no_checklist": "This employee has no checklist.", "lc_approve": "✓ Approve", "lc_reject": "✕ Reject", "lc_action": "Action", "lc_empty_changes": "No changes recorded.", "lc_propose": "Make proposal", "lc_new_title": "New job title", "lc_new_salary": "New salary", "lc_keep_department": "— leave department —", "lc_empty_departures": "No departures recorded.", "lc_register_departure": "Register departure", "lc_separation_kind": "Departure type", "lc_notice_date": "Notice date", "lc_last_workday": "Last working day", "lc_departure_start": "Start", "lc_not_found": "Departure not found", "lc_no_record": "No such record.", "lc_departure": "Departure", "lc_notified": "Notified", "lc_alumni": "Alumni", "lc_exit_interview": "Exit interview", "lc_exit_prompt": "What worked, what did not, and would they return?", "lc_sentiment": "Sentiment", "lc_empty_checklist": "No checklist.", "lc_last_role": "Last role", "lc_left": "Left", "lc_rehire": "Rehire", "lc_empty_alumni": "No alumni yet.", "lc_open_cases": "No open cases.", "lc_open_case": "Open a case", "lc_confidential": "— confidential / unnamed —", "lc_case_kind": "Case type", "lc_summary": "Summary", "lc_company": "Entire company", "lc_delta": "+/- employees", "lc_model": "Model", "lc_model_button": "Model", "lc_people_scenario": "Workforce scenario", "lc_org_chart": "Reporting structure", "lc_no_change": "no change", "lc_people": "people", "lc_save": "Save",
+    "perf_active_goals": "Active goals", "perf_at_risk": "{n} at risk or behind", "perf_feedback_30d": "Feedback (30d)", "perf_pieces": "pieces exchanged", "perf_open_cycles": "Open review cycles", "perf_reviews_due": "Reviews due", "perf_not_submitted": "not yet submitted", "perf_alignment": "Alignment", "perf_add_goal": "Add goal", "perf_add_a_goal": "Add a goal", "perf_save_checkin": "Save check-in", "perf_post": "Post", "perf_open_cycle": "Open cycle", "perf_calibrate": "Calibrate", "perf_create": "Create", "perf_submit_review": "Submit review", "perf_goal_list": "← Goal list", "perf_alignment_link": "Alignment tree →", "perf_checkin": "Check in", "perf_when": "When", "perf_value": "Value", "perf_note": "Note", "perf_by": "By", "perf_no_match": "No goals match.", "perf_none_linked": "None linked to this goal.", "perf_no_goals": "No goals yet.", "perf_no_feedback": "No feedback yet.", "perf_nothing_submitted": "Nothing submitted yet.", "perf_review_not_found": "Review not found", "perf_no_such_review": "No such review.", "perf_shown": "{n} shown — cascading company → team → individual", "perf_entries": "{n} entries", "perf_target": "Target", "perf_current": "Current", "perf_period": "Period", "perf_due": "Due", "perf_parent": "Parent goal", "perf_of_target": "{n}% of target", "perf_current_value": "Current value", "perf_changed": "What changed?", "perf_no_checkins": "No check-ins yet.", "perf_contributing": "Contributing goals ({n})", "perf_no_cycle": "No such review cycle.", "perf_cycle": "Cycle", "perf_reviews": "Reviews", "perf_submitted": "Submitted", "perf_complete": "Complete", "perf_review": "Review", "perf_rating": "Rating distribution", "perf_overall_summary": "Overall summary", "perf_outstanding": "Outstanding", "perf_exceeds": "Exceeds", "perf_meets": "Meets", "perf_developing": "Developing", "perf_below": "Below", "perf_review_prompt": "What went well, what to work on next.", "perf_signals_explanation": "Flags are raised from goal progress, attendance, feedback recency and tenure. Every flag lists the factors behind it — there are no unexplained scores, and nothing here should be acted on without a conversation.", "perf_attrition": "Attrition signals", "perf_advisory": "advisory only", "perf_signal": "Signal", "perf_why": "Why", "perf_no_signals": "No signals raised — good news.", "perf_readiness": "Promotion readiness", "perf_no_data": "Not enough data yet.", "perf_score": "Score",
+    "settings_connect_subtitle": "Connect FastHR to the job boards, calendars and tools you already use.", "settings_connected": "Connected", "settings_available": "of {n} available", "settings_attention": "Needs attention", "settings_failed_test": "failed connection test", "settings_not_configured": "Not configured", "settings_no_credentials": "no credentials stored", "settings_providers": "Providers", "settings_categories": "across 7 categories", "settings_no_key": "No key stored", "settings_configure": "Configure", "settings_test": "Test live connection", "settings_sync": "Sync now", "settings_encryption_notice": "Keys are encrypted at rest with the application secret and are never shown again in full. Only the last four characters are displayed. Rotating <code>FASTHR_SECRET</code> invalidates stored credentials and they must be re-entered.", "settings_remove": "Remove", "settings_no_roles": "No roles assigned yet.", "settings_all_data": "All data", "settings_own_department": "Own department", "settings_themselves": "Themselves only", "settings_link_optional": "— link to employee (optional) —", "settings_assign": "Assign role", "settings_role_notice": "Roles are recorded here and shown throughout the audit trail. <strong>Row-level enforcement is not yet wired into the query layer</strong>. Every signed-in user still sees all data. Assigning roles now means the enforcement pass has real assignments to apply.", "settings_stored_hint": "Stored encrypted. Leave a field blank to keep the current value.", "settings_account_ref": "Account / organisation reference (optional)", "settings_account_ref_hint": "e.g. your company page or account id at the provider", "settings_auto_sync": "Sync automatically once connected", "settings_save_credentials": "Save credentials", "settings_disconnect": "Disconnect and erase stored credentials", "settings_last_tested": "Last tested", "settings_last_sync": "Last sync", "settings_auto": "Auto-sync", "settings_on": "On", "settings_off": "Off", "settings_not_set": "— not set", "settings_never": "never", "settings_connection": "Connection", "settings_provider_label": "Provider", "settings_category": "Category",
+})
+
+APP_COPY["et"].update({"lc_change": "Muudatus", "lc_kind": "Liik", "lc_notice": "Teavitus", "lc_last_day": "Viimane päev", "lc_severity": "Raskusaste", "lc_visibility": "Nähtavus", "lc_open": "Ava", "table_name": "Nimi"})
+APP_COPY["en"].update({"lc_change": "Change", "lc_kind": "Kind", "lc_notice": "Notice", "lc_last_day": "Last day", "lc_severity": "Severity", "lc_visibility": "Visibility", "lc_open": "Open", "table_name": "Name"})
+APP_COPY["et"].update({"perf_progress": "Edenemine", "perf_cycles": "Hindamisperioodid", "perf_no_cycles": "Hindamisperioode pole veel.", "perf_no_reviews": "Hindamisi pole.", "perf_average": "Keskmine", "perf_range": "Vahemik", "perf_status": "Olek", "perf_kind": "Liik", "perf_overall": "Kokkuvõtlik hinnang", "perf_reviewer": "Hindaja", "perf_employee": "Töötaja", "perf_department": "Osakond", "perf_linked": "Vanem-eesmärgiga seotud eesmärgid", "perf_current_value": "Praegune väärtus"})
+APP_COPY["en"].update({"perf_progress": "Progress", "perf_cycles": "Review cycles", "perf_no_cycles": "No cycles yet.", "perf_no_reviews": "No reviews.", "perf_average": "Average", "perf_range": "Range", "perf_status": "Status", "perf_kind": "Kind", "perf_overall": "Overall", "perf_reviewer": "Reviewer", "perf_employee": "Employee", "perf_department": "Department", "perf_linked": "Goals linked to a parent", "perf_current_value": "Current value"})
+APP_COPY["en"].update({"lc_effective_from": "Effective from", "lc_from_to": "From → to", "lc_missing": "Missing", "lc_reason": "Reason"})
+APP_COPY["en"].update({"lc_employee_not_found": "Employee not found", "lc_in_progress": "In progress", "lc_no_employee": "No such employee."})
+APP_COPY["et"].update({"settings_enter": "Sisesta", "settings_ok": "OK", "settings_failed": "Ebaõnnestus", "settings_nothing": "Midagi pole veel."})
+APP_COPY["en"].update({"settings_enter": "Enter the", "settings_ok": "OK", "settings_failed": "Failed", "settings_nothing": "Nothing yet."})
+APP_COPY["et"]["lc_alumni"] = "Vilistlased"
 
 
 def t_app(lang: str, key: str) -> str:
