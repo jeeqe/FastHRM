@@ -873,3 +873,30 @@ def test_dashboard_and_people_pages_render_both_app_languages(fresh_db):
     assert "HEADCOUNT" in english_dashboard.text
     assert "Employees" in client.get("/employees?lang=en").text
     assert "Departments" in client.get("/departments?lang=en").text
+
+
+def test_time_section_pages_render_both_app_languages(fresh_db):
+    from starlette.testclient import TestClient
+
+    import web_app
+
+    client = TestClient(web_app.app)
+    client.post("/login", data={"email": web_app.VALID_EMAIL,
+                                "password": web_app.VALID_PASSWORD})
+
+    estonian_pages = {
+        "/leave": "Puhkuse taotlused",
+        "/attendance": "Kohalolek",
+        "/shifts": "Vahetused ja töögraafik",
+        "/timeclock": "Tööaja märkimine",
+    }
+    english_pages = {
+        "/leave": "Leave requests",
+        "/attendance": "Attendance",
+        "/shifts": "Shifts &amp; roster",
+        "/timeclock": "Time clocks",
+    }
+    for path, heading in estonian_pages.items():
+        assert heading in client.get(path).text
+    for path, heading in english_pages.items():
+        assert heading in client.get(f"{path}?lang=en").text

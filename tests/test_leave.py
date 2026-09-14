@@ -23,5 +23,5 @@ def test_leave_reject_button_has_visible_label(fresh_db):
     eid = _employee(fresh_db)
     fresh_db.apply_leave(eid, "Annual", "2026-07-01", "2026-07-02", "Rest")
     html = str(views.leave_main())
-    assert "✕ Reject" in html
-    assert "✓ Approve" in html
+    assert "✕ Lükka tagasi" in html
+    assert "✓ Kinnita" in html
