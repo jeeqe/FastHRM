@@ -825,6 +825,34 @@ def test_authenticated_language_persists_and_switches_on_admin_and_portal(fresh_
     assert 'href="/me?lang=en"' in portal.text
 
 
+def test_portal_content_is_bilingual_and_plural_safe(fresh_db):
+    from starlette.testclient import TestClient
+
+    import web_app
+    from web import selfservice
+
+    with fresh_db.cursor() as conn:
+        conn.execute(
+            "INSERT INTO employees(first_name,last_name,status,email,password_hash) "
+            "VALUES ('Ada','Lovelace','Active','ada@example.com',?)",
+            (selfservice.hash_password("secret"),),
+        )
+
+    client = TestClient(web_app.app)
+    client.post("/me/login", data={"email": "ada@example.com", "password": "secret"})
+    estonian = client.get("/me")
+    english = client.get("/me?lang=en")
+
+    assert "Järgmine vahetus" in estonian.text
+    assert "Avatud kulutaotlused" in estonian.text
+    assert "Next shift" in english.text
+    assert "Open expenses" in english.text
+    assert "(s)" not in estonian.text
+    assert "(s)" not in english.text
+    assert "Minu palk" in client.get("/me/pay?lang=et").text
+    assert "My pay" in client.get("/me/pay?lang=en").text
+
+
 def test_dashboard_and_people_pages_render_both_app_languages(fresh_db):
     from starlette.testclient import TestClient
 
