@@ -2,6 +2,17 @@
 
 Product changes are listed newest first. This file must remain synchronized with `docs/product_roadmap.md` under the rule documented there and in `AGENTS.md`.
 
+## 2026-09-14 — Lifecycle, performance and settings pages in Estonian and English
+
+### Added
+
+- Migrated lifecycle, performance and settings pages to the shared request-context app i18n copy; canonical statuses and seed data remain unchanged.
+- Added authenticated bilingual coverage for lifecycle, performance and settings routes, including the roles permissions view.
+
+### Verification
+
+- Added `test_lifecycle_performance_and_settings_pages_render_both_app_languages`; full suite verification is recorded with the pull request.
+
 ## 2026-09-14 — Admin pay-section pages in Estonian and English
 
 ### Added

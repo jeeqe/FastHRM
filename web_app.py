@@ -2762,7 +2762,12 @@ def post(session, provider: str):
 
 @rt("/settings/roles")
 def get(session, saved: str = ""):
-    return _guard(session, "roles", lambda: settings.roles_page(saved, resolve_lang(session)))
+    return _guard(session, "roles", lambda: settings.roles_page(saved))
+
+
+@rt("/settings/roles/permissions")
+def get(session):
+    return _guard(session, "roles", settings.roles_page)
 
 
 @rt("/settings/roles/permissions")

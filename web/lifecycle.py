@@ -11,16 +11,21 @@ from fasthtml.common import (
 import db
 import people
 from web.layout import kpi_card, money
+from web.i18n import current_lang, t_app
 from web.views import _pill, _title
+
+
+def _c(key):
+    return t_app(current_lang(), key)
 
 
 def _kpis():
     k = people.lifecycle_kpis()
-    return Div(kpi_card("Sisseelamine", k["onboarding"], f"{k['overdue_tasks']} hilinenud ülesannet",
+    return Div(kpi_card(_c("lc_onboarding"), k["onboarding"], f"{k['overdue_tasks']} hilinenud ülesannet",
                         tone="warn" if k["overdue_tasks"] else ""),
                kpi_card("Ootel muudatused", k["pending_changes"], "ootab kinnitamist",
                         tone="danger" if k["pending_changes"] else ""),
-               kpi_card("Lahkumised", k["separations"], "pooleli"),
+               kpi_card(_c("lc_departures"), k["separations"], "pooleli"),
                kpi_card("Avatud juhtumid", k["open_cases"], f"{k['alumni']} vilistlast",
                         tone="warn" if k["open_cases"] else ""),
                cls="kpi-grid")
@@ -29,6 +34,7 @@ def _kpis():
 # ---------- onboarding ------------------------------------------------------
 
 def onboarding_page():
+    c = _c
     board = people.onboarding_board()
     rows = []
     for b in board:
@@ -47,14 +53,15 @@ def onboarding_page():
     tbl = Table(Thead(Tr(Th("Uus töötaja"), Th("Osakond"), Th("Alustab"), Th("Ülesandeid", cls="num"),
                          Th("Edenemine"), Th("Hilinenud"), Th("Staatus"))),
                 Tbody(*rows or [Tr(Td("Hetkel pole kedagi sisseelamisel.", colspan="7"))]), cls="tbl")
-    return (_title("Sisseelamine", "Kontrollnimekirjad algavad automaatselt pakkumise vastuvõtmisel"),
-            _kpis(), Div(Div(H3("Pooleli"), cls="card-header"), tbl, cls="card"))
+    return (_title(c("lc_onboarding"), c("lc_onboarding_subtitle")),
+            _kpis(), Div(Div(H3(c("lc_in_progress")), cls="card-header"), tbl, cls="card"))
 
 
 def onboarding_detail(employee_id: int):
+    c = _c
     e = db.employee(employee_id)
     if not e:
-        return _title("Töötajat ei leitud"), P("Sellist töötajat pole.")
+        return _title(c("lc_employee_not_found")), P(c("lc_no_employee"))
     return (_title(f"Sisseelamine — {e['first_name']} {e['last_name']}",
                    f"{e['designation'] or ''} · alustas {e['date_of_joining'] or 'Puudub'}".strip(" ·"),
                    A("← Sisseelamine", href="/lifecycle/onboarding", cls="btn")),
@@ -119,8 +126,7 @@ def changes_page(status="All"):
     tbl = Table(Thead(Tr(Th("Töötaja"), Th("Osakond"), Th("Muudatus"), Th("Kehtib alates"),
                          Th("Kust → kuhu"), Th("Staatus"), Th("Tegevus"))),
                 Tbody(*rows or [Tr(Td("Muudatusi pole registreeritud.", colspan="7"))]), cls="tbl")
-    return (_title("Sisemised muudatused",
-                   "Edutamised, üleviimised ja rollimuudatused — kinnitatud, kuupäevaga ja auditeeritud"),
+    return (_title(_c("lc_changes"), _c("lc_changes_subtitle")),
             _kpis(), _change_form(), seg, Div(Div(tbl, cls="card"), id="changes"))
 
 
@@ -179,7 +185,7 @@ def separations_page(status="All"):
                     Button("Alusta", cls="btn primary", type="submit"),
                     method="post", action="/lifecycle/separations",
                     cls="inline-form", style="flex-wrap:wrap;gap:8px;"), cls="card")
-    return (_title("Lahkumised", "Etteteatamine, üleandmine, lahkumisintervjuu ja vilistlasstaatus"),
+    return (_title(_c("lc_departures"), _c("lc_departures_subtitle")),
             _kpis(), form, seg, Div(tbl, cls="card"))
 
 
@@ -250,7 +256,7 @@ def alumni_page():
                            Td(_pill(a["kind"] or "Puudub")),
                            Td(_pill(a["alumni_status"] or "Eligible")))
                         for a in al] or [Tr(Td("Vilistlasi pole veel.", colspan="6"))]), cls="tbl")
-    return (_title("Vilistlased", "Endised kolleegid — odavaim hea värbamise allikas"),
+    return (_title(_c("lc_alumni"), _c("lc_alumni_subtitle")),
             Div(Div(H3(f"{len(al)} vilistlast"), cls="card-header"), tbl, cls="card"))
 
 
@@ -298,8 +304,7 @@ def cases_page(status="All"):
                     Button("Ava", cls="btn primary", type="submit"),
                     method="post", action="/lifecycle/cases",
                     cls="inline-form", style="flex-wrap:wrap;gap:8px;"), cls="card")
-    return (_title("Töösuhted",
-                   "Kaebused, heaolu ja käitumine — piiratud nähtavus, täielik audit"),
+    return (_title(_c("lc_cases"), _c("lc_cases_subtitle")),
             _kpis(), form, seg, Div(Div(tbl, cls="card"), id="cases"))
 
 
@@ -345,7 +350,7 @@ def org_page(dept_id: int = 0, delta: int = 0):
                    Span("Uus aastakulu", cls="k"), Span(Strong(money(scenario["new_cost"]))),
                    cls="kv", style="margin-top:14px;"), cls="card")
 
-    return (_title("Org-struktuur", "Alluvussuhted, meeskondade suurused ja personalikulude stsenaariumid"),
+    return (_title(_c("lc_org"), _c("lc_org_subtitle")),
             Div(Div(Div(Div(H3("Alluvusstruktuur"), cls="card-header"),
                         Div(render(tree), cls="org"), cls="card")),
                 Div(scen), cls="detail-grid"))

@@ -10,10 +10,15 @@ import db
 import people
 import talent
 from web.layout import kpi_card
+from web.i18n import current_lang, t_app
 from web.views import _pill, _title
 
 TONE = {"On track": "", "Complete": "ok", "At risk": "warn", "Behind": "danger",
         "Cancelled": "cancelled"}
+
+
+def _c(key):
+    return t_app(current_lang(), key)
 
 
 def _bar(pct, status=""):
@@ -62,7 +67,7 @@ def goals_page(period="All", status="All", owner_type="All"):
             Div(_pill(g["status"], TONE.get(g["status"], "")), style="text-align:right;"),
             cls="goal-row"))
 
-    return (_title("Goals & OKRs", f"{len(gs)} shown — cascading company → team → individual"),
+    return (_title(_c("perf_goals"), f"{len(gs)} shown — cascading company → team → individual"),
             Div(kpi_card("Active goals", k["goals"], f"{k['at_risk']} at risk or behind",
                          tone="warn" if k["at_risk"] else ""),
                 kpi_card("Feedback (30d)", k["feedback_30d"], "pieces exchanged"),
@@ -85,7 +90,7 @@ def _new_goal_form():
     parents = db.rows("""SELECT id, title FROM goals WHERE owner_type IN ('company','department')
                          ORDER BY owner_type, title""")
     return Div(
-        Div(H3("Add a goal"), cls="card-header"),
+        Div(H3(_c("perf_add_goal")), cls="card-header"),
         Form(
             Input(name="title", placeholder="Goal title", cls="hr-inp", required=True,
                   style="flex:2;min-width:200px;"),
@@ -113,7 +118,7 @@ def _new_goal_form():
 def goal_detail(goal_id: int):
     g = people.goal(goal_id)
     if not g:
-        return _title("Goal not found"), P("No such goal.")
+        return _title(_c("perf_goal_not_found")), P(_c("perf_no_goal"))
     pct = people.goal_progress(g)
     history = people.checkins(goal_id)
     children = people.goals()
@@ -194,10 +199,10 @@ def alignment_page(period="All"):
                 Div(*render(n["children"], depth + 1), cls="kid") if n["children"] else None))
         return out
 
-    return (_title("Goal alignment",
+    return (_title(_c("perf_goal_alignment"),
                    "How individual goals ladder up to team and company objectives"),
             seg,
-            Div(Div(H3("Cascade"), A("← Goal list", href="/performance/goals", cls="btn sm"),
+            Div(Div(H3(_c("perf_cascade")), A("← Goal list", href="/performance/goals", cls="btn sm"),
                     cls="card-header"),
                 Div(*render(tree), cls="goal-tree") if tree
                 else P("No goals yet.", style="color:var(--text-mute);"), cls="card"))
@@ -212,7 +217,7 @@ def feedback_page(kind="All"):
     emps = db.employees_min()
     comps = talent.competencies()
 
-    form = Div(Div(H3("Give feedback"), cls="card-header"),
+    form = Div(Div(H3(_c("perf_give_feedback")), cls="card-header"),
                Form(Select(Option("— from —", value="0"),
                            *[Option(f"{e['first_name']} {e['last_name']}", value=str(e["id"]))
                              for e in emps], name="from_employee_id", cls="hr-inp"),
@@ -232,13 +237,13 @@ def feedback_page(kind="All"):
                        "hx-swap": "innerHTML"},
                     cls="inline-form", style="flex-wrap:wrap;gap:8px;"), cls="card")
 
-    return (_title("Feedback", f"{len(items)} entries — praise, coaching and peer review"),
+    return (_title(_c("perf_feedback"), f"{len(items)} entries — {_c('perf_feedback_subtitle')}"),
             form, seg, Div(feed_list(kind), id="feed"))
 
 
 def feed_list(kind="All"):
     items = people.feedback_feed(kind=kind)
-    return Div(Div(H3("Recent feedback"), cls="card-header"),
+    return Div(Div(H3(_c("perf_recent_feedback")), cls="card-header"),
                *[Div(Div(f"{i['from_name'] or 'Anonymous'} → ",
                          A(i["to_name"], href=f"/employees/{i['to_id']}"),
                          Span(f" · {i['created'][:16]}", style="color:var(--text-mute);"),
@@ -277,7 +282,7 @@ def reviews_page():
                               if c["status"] == "Open" else Span("—", style="color:var(--text-mute);")))
                         for c in cs] or [Tr(Td("No cycles yet.", colspan="7"))]), cls="tbl")
 
-    form = Div(Div(H3("New review cycle"), cls="card-header"),
+    form = Div(Div(H3(_c("perf_new_cycle")), cls="card-header"),
                Form(Input(name="name", placeholder="e.g. 2026 H2 review", cls="hr-inp",
                           required=True, style="flex:1;min-width:180px;"),
                     Input(type="date", name="period_start", cls="hr-inp", required=True, aria_label="Perioodi algus"),
@@ -286,7 +291,7 @@ def reviews_page():
                     method="post", action="/performance/reviews",
                     cls="inline-form", style="flex-wrap:wrap;gap:8px;"), cls="card")
 
-    return (_title("Review cycles", "Self, manager and skip-level reviews with calibration"),
+    return (_title(_c("perf_cycles"), _c("perf_cycle_subtitle")),
             Div(kpi_card("Open cycles", k["open_cycles"]),
                 kpi_card("Reviews due", k["reviews_due"], "not yet submitted",
                          tone="danger" if k["reviews_due"] else ""),
@@ -303,7 +308,7 @@ def cycles_fragment():
 def cycle_detail(cycle_id: int, status="All"):
     c = people.cycle(cycle_id)
     if not c:
-        return _title("Cycle not found"), P("No such review cycle.")
+        return _title(_c("perf_cycle_not_found")), P(_c("perf_no_cycle"))
     rs = people.reviews_in(cycle_id, status)
     grid = people.calibration_grid(cycle_id)
     dist = people.rating_distribution(cycle_id)
@@ -323,7 +328,7 @@ def cycle_detail(cycle_id: int, status="All"):
                               else Span("—", style="color:var(--text-mute);")))
                         for r in rs] or [Tr(Td("No reviews.", colspan="7"))]), cls="tbl")
 
-    cal = Div(Div(H3("Calibration by department"), cls="card-header"),
+    cal = Div(Div(H3(_c("perf_calibration")), cls="card-header"),
               Table(Thead(Tr(Th("Department"), Th("Reviews", cls="num"), Th("Average", cls="num"),
                              Th("Range", cls="num"))),
                     Tbody(*[Tr(Td(g["dept"] or "—"), Td(str(g["n"]), cls="num"),
@@ -418,6 +423,6 @@ def signals_page(dept="All"):
                       for r in ready] or [Tr(Td("Not enough data yet.", colspan="4"))]),
               cls="tbl"), cls="card")
 
-    return (_title("Performance signals",
+    return (_title(_c("perf_signals"),
                    "Explainable, advisory indicators — every score shows its working"),
             seg, risk_card, ready_card)

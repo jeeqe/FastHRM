@@ -63,6 +63,7 @@ def t(lang: str) -> dict:
 
 COPY = {
     "et": {
+        "rbac_title": "Rollid", "rbac_subtitle": "Määra rollidele moodulite vaatamise ja muutmise õigused.", "rbac_permissions": "Moodulite õigused", "rbac_role": "Roll", "rbac_view": "Vaata", "rbac_edit": "Muuda", "rbac_save": "Salvesta õigused", "rbac_unconfigured": "Tühjad moodulid järgivad senist ligipääsu.",
         "html_lang": "et",
         "meta_title": "FastHR · Eesti personalitöö ja palgaarvestus",
         "meta_desc": "Töötajad, puudumised, Eesti palgaarvestus (TÖR, TSD) ja "
@@ -343,6 +344,7 @@ COPY = {
         },
     },
     "en": {
+        "rbac_title": "Roles", "rbac_subtitle": "Set module-level viewing and editing rights for each role.", "rbac_permissions": "Module permissions", "rbac_role": "Role", "rbac_view": "View", "rbac_edit": "Edit", "rbac_save": "Save permissions", "rbac_unconfigured": "Unconfigured modules keep the previous access behaviour.",
         "html_lang": "en",
         "meta_title": "FastHR · Estonian HR & payroll, open source",
         "meta_desc": "Employee records, leave, Estonian statutory payroll (TÖR, TSD) "
@@ -629,6 +631,7 @@ COPY = {
 
 APP_COPY = {
     "et": {
+        "rbac_title": "Rollid", "rbac_subtitle": "Määra rollidele moodulite vaatamise ja muutmise õigused.", "rbac_permissions": "Moodulite õigused", "rbac_role": "Roll", "rbac_view": "Vaata", "rbac_edit": "Muuda", "rbac_save": "Salvesta õigused", "rbac_unconfigured": "Tühjad moodulid järgivad senist ligipääsu.",
         "nav_overview": "ÜLEVAADE",
         "nav_people": "INIMESED",
         "nav_time": "AEG",
@@ -833,8 +836,13 @@ APP_COPY = {
         "benefits_category": "Kategooria", "benefits_enrolled": "Registreerunud", "benefits_empty": "Soodustusi pole.",
         "benefits_employee": "Töötaja", "benefits_enrolment": "Töötajate registreerimine",
         "benefits_no_employees": "Aktiivseid töötajaid pole.", "benefits_subtitle": "Tööandjapoolsed soodustused: registreerimine ja kulu",
+        "lc_onboarding": "Sisseelamine", "lc_onboarding_subtitle": "Kontrollnimekirjad algavad automaatselt pakkumise vastuvõtmisel", "lc_changes": "Sisemised muudatused", "lc_changes_subtitle": "Edutamised, üleviimised ja rollimuudatused — kinnitatud, kuupäevaga ja auditeeritud", "lc_departures": "Lahkumised", "lc_departures_subtitle": "Etteteatamine, üleandmine, lahkumisintervjuu ja vilistlasstaatus", "lc_alumni": "Vilistlased", "lc_alumni_subtitle": "Endised kolleegid — odavaim hea värbamise allikas", "lc_cases": "Juhtumid", "lc_cases_subtitle": "Kaebused, heaolu ja käitumine — piiratud nähtavus, täielik audit", "lc_org": "Organisatsioon",
+        "lc_in_progress": "Pooleli", "lc_employee_not_found": "Töötajat ei leitud", "lc_no_employee": "Sellist töötajat pole.", "lc_propose": "Tee ettepanek", "lc_register_departure": "Registreeri lahkuja", "lc_exit_interview": "Lahkumisintervjuu", "lc_effective_from": "Kehtib alates", "lc_from_to": "Kust → kuhu", "lc_reason": "Põhjus", "lc_missing": "Puudub",
+        "perf_goals": "Eesmärgid ja OKR-id", "perf_alignment": "Eesmärkide hierarhia", "perf_add_goal": "Lisa eesmärk", "perf_goal_not_found": "Eesmärki ei leitud", "perf_no_goal": "Sellist eesmärki pole.", "perf_no_cycle": "Sellist hindamisperioodi pole.", "perf_check_in": "Uuenda eesmärki", "perf_checkin_history": "Progressi ajalugu", "perf_contributing_goals": "Alameesmärgid", "perf_goal_alignment": "Eesmärgi sidumine", "perf_cascade": "Kaskaad", "perf_give_feedback": "Anna tagasisidet", "perf_feedback": "Tagasiside", "perf_recent_feedback": "Hiljutine tagasiside", "perf_new_cycle": "Uus hindamisperiood", "perf_cycles": "Hindamisperioodid", "perf_cycle_not_found": "Hindamisperioodi ei leitud", "perf_cycle_subtitle": "Isehindamine, juhi ja ülemjuhi hindamine koos kalibreerimisega", "perf_calibration": "Kalibreerimine osakonniti", "perf_when": "Millal", "perf_value": "Väärtus", "perf_status": "Olek", "perf_note": "Märkus", "perf_by": "Lisaja", "perf_overall": "Kokkuvõtlik hinnang", "perf_reviewer": "Hindaja", "perf_kind": "Liik", "perf_employee": "Töötaja", "perf_department": "Osakond", "perf_feedback_subtitle": "kiitus, juhendamine ja kolleegide hinnangud", "perf_signals": "Tulemuslikkuse signaalid",
+        "settings_integrations": "Integratsioonid", "settings_recent_activity": "Hiljutine integratsioonide tegevus", "settings_account": "Konto", "settings_role": "Roll", "settings_scope": "Ulatus", "settings_linked_employee": "Seotud töötaja", "settings_assign_role": "Määra roll", "settings_assigned_roles": "Määratud rollid ({n})", "settings_role_purpose": "Rollide kirjeldused", "settings_intended_access": "Eesmärk ja ligipääs", "settings_connection": "Ühendus", "settings_credentials": "Mandaadid", "settings_activity": "Tegevus", "settings_when": "Millal", "settings_provider": "Pakkuja", "settings_event": "Sündmus", "settings_result": "Tulemus", "settings_detail": "Detail", "settings_unknown": "Tundmatu integratsioon", "settings_no_provider": "Sellist pakkujat pole.",
     },
     "en": {
+        "rbac_title": "Roles", "rbac_subtitle": "Set module-level viewing and editing rights for each role.", "rbac_permissions": "Module permissions", "rbac_role": "Role", "rbac_view": "View", "rbac_edit": "Edit", "rbac_save": "Save permissions", "rbac_unconfigured": "Unconfigured modules keep the previous access behaviour.",
         "nav_overview": "OVERVIEW",
         "nav_people": "PEOPLE",
         "nav_time": "TIME",
@@ -1023,6 +1031,9 @@ APP_COPY = {
         "benefits_name": "Name", "benefits_category": "Category", "benefits_enrolled": "Enrolled", "benefits_empty": "No benefit plans.",
         "benefits_employee": "Employee", "benefits_enrolment": "Employee enrolment", "benefits_no_employees": "No active employees.",
         "benefits_subtitle": "Eligibility, enrolment and employer contribution tracking",
+        "lc_onboarding": "Onboarding", "lc_onboarding_subtitle": "Checklists start automatically when an offer is accepted", "lc_changes": "Internal changes", "lc_changes_subtitle": "Promotions, transfers and role changes — approved, dated and audited", "lc_departures": "Departures", "lc_departures_subtitle": "Notice, handover, exit interview and alumni status", "lc_alumni": "Alumni", "lc_alumni_subtitle": "Former colleagues — the cheapest good recruiting source", "lc_cases": "Cases", "lc_cases_subtitle": "Complaints, wellbeing and conduct — restricted visibility, complete audit", "lc_org": "Organization",
+        "perf_goals": "Goals & OKRs", "perf_alignment": "Alignment tree", "perf_add_goal": "Add a goal", "perf_goal_not_found": "Goal not found", "perf_no_goal": "No such goal.", "perf_no_cycle": "No such review cycle.", "perf_check_in": "Check in", "perf_checkin_history": "Check-in history", "perf_contributing_goals": "Contributing goals", "perf_goal_alignment": "Goal alignment", "perf_cascade": "Cascade", "perf_give_feedback": "Give feedback", "perf_feedback": "Feedback", "perf_recent_feedback": "Recent feedback", "perf_new_cycle": "New review cycle", "perf_cycles": "Review cycles", "perf_cycle_not_found": "Cycle not found", "perf_cycle_subtitle": "Self, manager and skip-level reviews with calibration", "perf_calibration": "Calibration by department", "perf_when": "When", "perf_value": "Value", "perf_status": "Status", "perf_note": "Note", "perf_by": "By", "perf_overall": "Overall", "perf_reviewer": "Reviewer", "perf_kind": "Kind", "perf_employee": "Employee", "perf_department": "Department", "perf_feedback_subtitle": "praise, coaching and peer review", "perf_signals": "Performance signals",
+        "settings_integrations": "Integrations", "settings_recent_activity": "Recent integration activity", "settings_account": "Account", "settings_role": "Role", "settings_scope": "Scope", "settings_linked_employee": "Linked employee", "settings_assign_role": "Assign a role", "settings_assigned_roles": "Assigned roles ({n})", "settings_role_purpose": "What each role is for", "settings_intended_access": "Intended access", "settings_connection": "Connection", "settings_credentials": "Credentials", "settings_activity": "Activity", "settings_when": "When", "settings_provider": "Provider", "settings_event": "Event", "settings_result": "Result", "settings_detail": "Detail", "settings_unknown": "Unknown integration", "settings_no_provider": "No such provider.",
     },
 }
 

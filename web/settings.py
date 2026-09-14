@@ -13,7 +13,7 @@ from fasthtml.common import (
 
 import integrations
 from web.layout import kpi_card, NAV_ITEMS
-from web.i18n import t
+from web.i18n import current_lang, t_app
 from web.views import _pill, _title
 from web.rbac import MODULES, permissions_for
 
@@ -70,12 +70,14 @@ def integrations_grid():
 
 
 def integrations_page(saved: str = ""):
+    lang = current_lang()
+    c = lambda key: t_app(lang, key)
     k = integrations.kpis()
     banner = P(saved, cls="flag",
                style="border-left-color:var(--accent);background:var(--accent-light);"
                      "color:var(--accent-hover);") if saved else None
     return (
-        _title("Integrations",
+        _title(c("settings_integrations"),
                "Connect FastHR to the job boards, calendars and tools you already use."),
         banner,
         Div(kpi_card("Connected", k["connected"], f"of {k['total']} available"),
@@ -89,7 +91,7 @@ def integrations_page(saved: str = ""):
                  "invalidates stored credentials and they must be re-entered."),
           style="color:var(--text-mute);font-size:12.5px;margin:-4px 0 14px;"),
         Div(integrations_grid(), id="int-grid"),
-        Div(Div(H3("Recent integration activity"), cls="card-header"),
+        Div(Div(H3(c("settings_recent_activity")), cls="card-header"),
             _event_table(integrations.events(limit=15)), cls="card", style="margin-top:20px;"),
     )
 
@@ -115,8 +117,9 @@ ROLE_LABELS = {
 }
 
 
-def permissions_matrix(lang: str = "et"):
-    copy = t(lang)
+def permissions_matrix():
+    lang = current_lang()
+    c = lambda key: t_app(lang, key)
     rows = []
     for role in ROLES:
         role_permissions = permissions_for({role})
@@ -125,20 +128,22 @@ def permissions_matrix(lang: str = "et"):
             permission = role_permissions.get(key, {"view": False, "edit": False})
             cells.append(Td(
                 Label(Input(type="checkbox", name=f"view_{role}_{key}", value="1",
-                            checked=permission["view"]), copy["rbac_view"]),
+                            checked=permission["view"]), c("rbac_view")),
                 Label(Input(type="checkbox", name=f"edit_{role}_{key}", value="1",
-                            checked=permission["edit"]), copy["rbac_edit"]),
+                            checked=permission["edit"]), c("rbac_edit")),
                 cls="rbac-cell"))
         rows.append(Tr(Td(Strong(ROLE_LABELS[role][lang])), *cells))
-    headers = [Th(copy["rbac_role"])] + [Th(label) for _key, label in MODULES]
+    headers = [Th(c("rbac_role"))] + [Th(label) for _key, label in MODULES]
     return Form(
         Table(Thead(Tr(*headers)), Tbody(*rows), cls="tbl rbac-table"),
-        Div(Button(copy["rbac_save"], cls="btn primary", type="submit"),
-            P(copy["rbac_unconfigured"], cls="int-meta")),
+        Div(Button(c("rbac_save"), cls="btn primary", type="submit"),
+            P(c("rbac_unconfigured"), cls="int-meta")),
         method="post", action="/settings/roles/permissions")
 
 
-def roles_page(saved: str = "", lang: str = "et"):
+def roles_page(saved: str = ""):
+    lang = current_lang()
+    c = lambda key: t_app(lang, key)
     import db
     assigned = db.rows("""SELECT r.*, e.first_name||' '||e.last_name employee
                           FROM account_roles r LEFT JOIN employees e ON e.id=r.employee_id
@@ -148,7 +153,7 @@ def roles_page(saved: str = "", lang: str = "et"):
                style="border-left-color:var(--accent);background:var(--accent-light);"
                      "color:var(--accent-hover);") if saved else None
 
-    tbl = Table(Thead(Tr(Th("Account"), Th("Role"), Th("Scope"), Th("Linked employee"), Th(""))),
+    tbl = Table(Thead(Tr(Th(c("settings_account")), Th(c("settings_role")), Th(c("settings_scope")), Th(c("settings_linked_employee")), Th(""))),
                 Tbody(*[Tr(Td(r["account_email"]), Td(_pill(r["role"])), Td(_pill(r["scope"])),
                            Td(r["employee"] or "—"),
                            Td(Button("Remove", cls="btn sm",
@@ -170,23 +175,22 @@ def roles_page(saved: str = "", lang: str = "et"):
         method="post", action="/settings/roles", cls="inline-form",
         style="flex-wrap:wrap;gap:8px;")
 
-    copy = t(lang)
-    return (_title(copy["rbac_title"], copy["rbac_subtitle"]),
+    return (_title(c("rbac_title"), c("rbac_subtitle")),
             banner,
             P(NotStr("Roles are recorded here and shown throughout the audit trail. "
                      "<strong>Row-level enforcement is not yet wired into the query layer</strong>. "
                      "every signed-in user still sees all data. Assigning roles now means the "
                      "enforcement pass has real assignments to apply."),
               cls="flag"),
-            Div(Div(H3("Assign a role"), cls="card-header"), form, cls="card"),
-            Div(Div(Div(H3(f"Assigned roles ({len(assigned)})"), cls="card-header"), tbl,
+            Div(Div(H3(c("settings_assign_role")), cls="card-header"), form, cls="card"),
+            Div(Div(Div(H3(c("settings_assigned_roles").format(n=len(assigned))), cls="card-header"), tbl,
                     cls="card"), id="roles"),
-            Div(Div(H3("What each role is for"), cls="card-header"),
-                Table(Thead(Tr(Th("Role"), Th("Intended access"))),
+            Div(Div(H3(c("settings_role_purpose")), cls="card-header"),
+                Table(Thead(Tr(Th(c("settings_role")), Th(c("settings_intended_access")))),
                       Tbody(*[Tr(Td(_pill(r)), Td(ROLE_BLURB[r])) for r in ROLES]), cls="tbl"),
                 cls="card"),
-            Div(Div(H3(copy["rbac_permissions"], cls="card-header"),
-                    permissions_matrix(lang), cls="card")))
+            Div(H3(c("rbac_permissions"), cls="card-header"),
+                permissions_matrix(), cls="card"))
 
 
 def roles_table():
@@ -194,7 +198,9 @@ def roles_table():
 
 
 def _event_table(evts):
-    return Table(Thead(Tr(Th("When"), Th("Provider"), Th("Event"), Th("Result"), Th("Detail"))),
+    lang = current_lang()
+    c = lambda key: t_app(lang, key)
+    return Table(Thead(Tr(Th(c("settings_when")), Th(c("settings_provider")), Th(c("settings_event")), Th(c("settings_result")), Th(c("settings_detail")))),
                  Tbody(*[Tr(Td(Small(e["created"], style="color:var(--text-mute);white-space:nowrap;")),
                             Td(integrations.provider_meta(e["provider"] or "")["label"]),
                             Td(_pill(e["kind"] or "—")),
@@ -205,10 +211,12 @@ def _event_table(evts):
 
 
 def integration_detail(provider: str, note: str = ""):
+    lang = current_lang()
+    c = lambda key: t_app(lang, key)
     meta = integrations.provider_meta(provider)
     live = next((i for i in integrations.all_integrations() if i["provider"] == provider), None)
     if not live:
-        return _title("Unknown integration"), P("No such provider.")
+        return _title(c("settings_unknown")), P(c("settings_no_provider"))
 
     banner = None
     if note:
@@ -271,9 +279,9 @@ def integration_detail(provider: str, note: str = ""):
                  cls="card")
 
     return (_title(meta["label"], meta["blurb"],
-                   A("← Integrations", href="/settings/integrations", cls="btn")),
+                   A("← " + c("settings_integrations"), href="/settings/integrations", cls="btn")),
             banner,
-            Div(Div(Div(Div(H3("Credentials"), cls="card-header"),
+            Div(Div(Div(Div(H3(c("settings_credentials")), cls="card-header"),
                         P("Stored encrypted. Leave a field blank to keep the current value.",
                           style="color:var(--text-mute);font-size:12.5px;margin:0 0 12px;"),
                         form,
@@ -281,6 +289,6 @@ def integration_detail(provider: str, note: str = ""):
                                           "border-top:1px solid var(--border);") if danger else None,
                         cls="card")),
                 Div(detail,
-                    Div(Div(H3("Activity"), cls="card-header"),
+                    Div(Div(H3(c("settings_activity")), cls="card-header"),
                         _event_table(integrations.events(provider, limit=12)), cls="card")),
                 cls="detail-grid"))
