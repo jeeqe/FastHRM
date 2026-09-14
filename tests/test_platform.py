@@ -823,3 +823,25 @@ def test_authenticated_language_persists_and_switches_on_admin_and_portal(fresh_
     assert '<html lang="en">' in portal.text
     assert 'href="/me?lang=et"' in portal.text
     assert 'href="/me?lang=en"' in portal.text
+
+
+def test_dashboard_and_people_pages_render_both_app_languages(fresh_db):
+    from starlette.testclient import TestClient
+
+    import web_app
+
+    client = TestClient(web_app.app)
+    client.post("/login", data={"email": web_app.VALID_EMAIL,
+                                "password": web_app.VALID_PASSWORD})
+
+    estonian_dashboard = client.get("/")
+    assert "Personalijuhi töölaud" in estonian_dashboard.text
+    assert "TÖÖTAJATE ARV" in estonian_dashboard.text
+    assert "Töötajad" in client.get("/employees?lang=et").text
+    assert "Osakonnad" in client.get("/departments?lang=et").text
+
+    english_dashboard = client.get("/?lang=en")
+    assert "HR Dashboard" in english_dashboard.text
+    assert "HEADCOUNT" in english_dashboard.text
+    assert "Employees" in client.get("/employees?lang=en").text
+    assert "Departments" in client.get("/departments?lang=en").text

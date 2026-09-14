@@ -2,6 +2,16 @@
 
 Product changes are listed newest first. This file must remain synchronized with `docs/product_roadmap.md` under the rule documented there and in `AGENTS.md`.
 
+## 2026-09-14 — Dashboard and people pages in Estonian and English
+
+### Added
+
+- Localized the authenticated dashboard, employees list and departments list with session-backed Estonian/English app copy. Workforce and other modules remain unchanged for later PRs.
+
+### Verification
+
+- Added `test_dashboard_and_people_pages_render_both_app_languages`; full test suite verification is recorded with the pull request.
+
 ## 2026-09-14 — Authenticated app i18n foundation
 
 ### Added
