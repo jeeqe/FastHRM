@@ -9,7 +9,7 @@ from fasthtml.common import (
 )
 
 import db
-from web.i18n import t
+from web.i18n import current_lang, t, t_app
 from web.layout import kpi_card, money
 
 ATT_CLASS = {"Present": "att-present", "Work From Home": "att-wfh", "On Leave": "att-leave",
@@ -37,6 +37,7 @@ def _name(e):
 # ---------- dashboard -------------------------------------------------------
 
 def dashboard():
+    lang = current_lang()
     k = db.kpis()
     by_dept = db.headcount_by_dept()
     mx = max((d["n"] for d in by_dept), default=1) or 1
@@ -50,33 +51,43 @@ def dashboard():
     pending = db.rows("""SELECT lr.*, e.first_name,e.last_name FROM leave_requests lr
                          JOIN employees e ON e.id=lr.employee_id WHERE lr.status='Pending'
                          ORDER BY lr.from_date LIMIT 8""")
-    pend_tbl = Table(Thead(Tr(Th("Töötaja"), Th("Liik"), Th("Kuupäevad"), Th("Päevad"), Th("Põhjus"))),
+    pend_tbl = Table(Thead(Tr(Th(t_app(lang, "table_employee")), Th(t_app(lang, "table_type")),
+                              Th(t_app(lang, "table_dates")), Th(t_app(lang, "table_days")),
+                              Th(t_app(lang, "table_reason")))),
                      Tbody(*[Tr(Td(f"{r['first_name']} {r['last_name']}"), Td(_pill(r["leave_type"])),
                                 Td(f"{r['from_date']} → {r['to_date']}", style="white-space:nowrap;"),
                                 Td(str(r["days"]), cls="num"), Td(r["reason"]))
-                              for r in pending] or [Tr(Td("Ootel taotlusi pole", colspan="5"))]), cls="tbl")
-    leave_tbl = Table(Thead(Tr(Th("Täna puhkusel"), Th("Osakond"))),
-                      Tbody(*[Tr(Td(f"{r['first_name']} {r['last_name']}"), Td(r["dept"] or "Puudub"))
-                               for r in on_leave] or [Tr(Td("Täna pole keegi puhkusel.", colspan="2"))]), cls="tbl")
+                              for r in pending] or [Tr(Td(t_app(lang, "empty_pending_leave"), colspan="5"))]), cls="tbl")
+    leave_tbl = Table(Thead(Tr(Th(t_app(lang, "on_leave_today")), Th(t_app(lang, "table_department")))),
+                      Tbody(*[Tr(Td(f"{r['first_name']} {r['last_name']}"),
+                                 Td(r["dept"] or t_app(lang, "app_missing_value")))
+                               for r in on_leave] or
+                           [Tr(Td(t_app(lang, "empty_on_leave"), colspan="2"))]), cls="tbl")
 
     return (
-        _title("Töölaud", "Töötajad, tööaeg ja palgaarvestus ühel lehel."),
-        Div(kpi_card("Töötajaid", k["headcount"], f"{k['depts']} osakonda"),
-            kpi_card("Täna tööl", k["present_today"], f"{k['on_leave_today']} puhkusel"),
-            kpi_card("Kohalolek (30 päeva)", f"{k['attendance_rate']}%", tone="warn" if k["attendance_rate"] < 85 else ""),
-            kpi_card("Ootel puhkused", k["pending_leave"], "ootab kinnitamist", tone="danger" if k["pending_leave"] else ""),
+        _title(t_app(lang, "dashboard_title"), t_app(lang, "dashboard_subtitle")),
+        Div(kpi_card(t_app(lang, "kpi_headcount"), k["headcount"],
+                     f"{k['depts']} {t_app(lang, 'kpi_departments')}"),
+            kpi_card(t_app(lang, "kpi_present_today"), k["present_today"],
+                     f"{k['on_leave_today']} {t_app(lang, 'kpi_on_leave')}"),
+            kpi_card(t_app(lang, "kpi_attendance"), f"{k['attendance_rate']}%",
+                     tone="warn" if k["attendance_rate"] < 85 else ""),
+            kpi_card(t_app(lang, "kpi_pending_leave"), k["pending_leave"],
+                     t_app(lang, "kpi_awaiting_approval"), tone="danger" if k["pending_leave"] else ""),
             cls="kpi-grid"),
-        Div(Div(Div(H3("Töötajate arv osakondade kaupa"), cls="card-header"), *funnel, cls="card"),
-            Div(Div(H3("Täna puhkusel"), cls="card-header"), leave_tbl, cls="card"), cls="grid-2"),
-        Div(Div(H3("Ootel puhkuse taotlused"), cls="card-header"), pend_tbl, cls="card"),
+        Div(Div(Div(H3(t_app(lang, "headcount_by_department")), cls="card-header"), *funnel, cls="card"),
+            Div(Div(H3(t_app(lang, "on_leave_today")), cls="card-header"), leave_tbl, cls="card"), cls="grid-2"),
+        Div(Div(H3(t_app(lang, "pending_leave_requests")), cls="card-header"), pend_tbl, cls="card"),
     )
 
 
 # ---------- employees -------------------------------------------------------
 
 def employees_list(dept="All", q=""):
+    lang = current_lang()
     depts = db.rows("SELECT name FROM departments ORDER BY name")
-    seg = Div(*[A(s, href=f"/employees?dept={s}", cls="" + ("active" if dept == s else ""))
+    seg = Div(*[A(t_app(lang, "employees_all") if s == "All" else s,
+                  href=f"/employees?dept={s}", cls="" + ("active" if dept == s else ""))
                 for s in ["All"] + [d["name"] for d in depts]], cls="seg")
     where, params = [], []
     if dept != "All":
@@ -88,15 +99,22 @@ def employees_list(dept="All", q=""):
     clause = ("WHERE " + " AND ".join(where)) if where else ""
     emps = db.rows(f"""SELECT e.*, d.name dept FROM employees e LEFT JOIN departments d ON d.id=e.dept_id
                        {clause} ORDER BY e.first_name LIMIT 300""", tuple(params))
-    tbl = Table(Thead(Tr(Th("Töötaja"), Th("Amet"), Th("Osakond"), Th("Üksus"), Th("Staatus"), Th("Tööle asumine"))),
+    tbl = Table(Thead(Tr(Th(t_app(lang, "table_employee")), Th(t_app(lang, "employees_job_title")),
+                        Th(t_app(lang, "table_department")), Th(t_app(lang, "employees_branch")),
+                        Th(t_app(lang, "employees_status")), Th(t_app(lang, "employees_start_date")))),
                 Tbody(*[Tr(
                     Td(A(_name(e), href=f"/employees/{e['id']}")),
-                    Td(e["designation"] or "Puudub"), Td(e["dept"] or "Puudub"), Td(e["branch"] or "Puudub"),
-                    Td(_pill(e["status"])), Td(e["date_of_joining"] or "Puudub", style="color:var(--text-mute);"))
-                    for e in emps] or [Tr(Td("Töötajaid ei leitud.", colspan="6"))]), cls="tbl")
-    search = Form(Input(type="search", name="q", value=q, placeholder="Otsi töötajaid…"),
+                    Td(e["designation"] or t_app(lang, "app_missing_value")),
+                    Td(e["dept"] or t_app(lang, "app_missing_value")),
+                    Td(e["branch"] or t_app(lang, "app_missing_value")),
+                    Td(_pill(e["status"])),
+                    Td(e["date_of_joining"] or t_app(lang, "app_missing_value"), style="color:var(--text-mute);"))
+                    for e in emps] or [Tr(Td(t_app(lang, "employees_empty"), colspan="6"))]), cls="tbl")
+    search = Form(Input(type="search", name="q", value=q,
+                        placeholder=t_app(lang, "employees_search_placeholder")),
                   Input(type="hidden", name="dept", value=dept), cls="toolbar", method="get", action="/employees")
-    return _title("Töötajad", f"{len(emps)} kuvatud"), seg, search, Div(tbl, cls="card")
+    return _title(t_app(lang, "employees_title"),
+                  f"{len(emps)} {t_app(lang, 'employees_shown')}"), seg, search, Div(tbl, cls="card")
 
 
 def employee_detail(eid):
@@ -139,17 +157,21 @@ def employee_detail(eid):
 
 
 def departments_list():
+    lang = current_lang()
     deps = db.rows("""SELECT d.name, COUNT(e.id) n,
                       (SELECT m.first_name||' '||m.last_name FROM employees m
                        WHERE m.dept_id=d.id AND m.manager_id IS NULL LIMIT 1) lead,
                       COALESCE(SUM(e.base_salary),0) payroll
                       FROM departments d LEFT JOIN employees e ON e.dept_id=d.id
                       GROUP BY d.id ORDER BY n DESC""")
-    tbl = Table(Thead(Tr(Th("Osakond"), Th("Juht"), Th("Töötajaid", cls="num"), Th("Aastane palgakulu", cls="num"))),
-                Tbody(*[Tr(Td(Strong(d["name"])), Td(d["lead"] or "Puudub"), Td(str(d["n"]), cls="num"),
+    tbl = Table(Thead(Tr(Th(t_app(lang, "table_department")), Th(t_app(lang, "departments_lead")),
+                        Th(t_app(lang, "departments_employees"), cls="num"),
+                        Th(t_app(lang, "departments_payroll"), cls="num"))),
+                Tbody(*[Tr(Td(Strong(d["name"])), Td(d["lead"] or t_app(lang, "app_missing_value")), Td(str(d["n"]), cls="num"),
                            Td(money(d["payroll"]), cls="num")) for d in deps]
-                or [Tr(Td("Osakondi pole.", colspan="4"))]), cls="tbl")
-    return _title("Osakonnad", f"{len(deps)} osakonda"), Div(tbl, cls="card")
+                or [Tr(Td(t_app(lang, "departments_empty"), colspan="4"))]), cls="tbl")
+    return _title(t_app(lang, "departments_title"),
+                  f"{len(deps)} {t_app(lang, 'departments_shown')}"), Div(tbl, cls="card")
 
 
 # ---------- leave -----------------------------------------------------------
