@@ -21,6 +21,7 @@ import secrets
 import time
 import uuid
 import logging
+import re
 from collections import defaultdict, deque
 from datetime import date
 from pathlib import Path
@@ -53,7 +54,7 @@ import version
 from web.layout import page, LAYOUT_CSS, NAV_ITEMS
 from web import views, ai, ats, careers, cv_extract, ranking, performance, lifecycle, recruiting_platform, settings, selfservice, statutory
 from web.landing import comparison_page, features_page, landing_page
-from web.i18n import reset_request_context, resolve_lang, set_request_context
+from web.i18n import current_lang, reset_request_context, resolve_lang, set_request_context, t_app
 from web.i18n import t
 from web.rbac import can
 from web.seo import register_seo_routes
@@ -337,12 +338,13 @@ def delete(request, member_id: int):
 
 
 def _login_card(error="", email=""):
+    lang = current_lang()
     return Title("FastHR · Logi sisse"), Style(LAYOUT_CSS), Div(
-        Form(H1("FastHR"), P("Sign in to your HR workspace"),
+        Form(H1("FastHR"), P(t_app(lang, "wa_signin_intro")),
              Input(name="email", type="email", placeholder="Email", value=email, required=True),
              Input(name="password", type="password", placeholder="Password", required=True),
              P(error, cls="error") if error else None,
-             Button("Sign in", cls="btn primary", type="submit"),
+             Button(t_app(lang, "wa_signin"), cls="btn primary", type="submit"),
              P(NotStr("Demo: <code>admin@fasthr.example</code> / <code>FastHR2026$</code>"), cls="hint"),
              method="post", action="/login", cls="login-card"), cls="login-wrap")
 
@@ -359,7 +361,8 @@ def post(session, email: str = "", password: str = ""):
     if email.strip().lower() == VALID_EMAIL.lower() and password == VALID_PASSWORD:
         session["user"] = email.strip().lower()
         return RedirectResponse("/", status_code=303)
-    return _login_card("Invalid email or password.", email)
+    session["lang"] = resolve_lang(session)
+    return _login_card(t_app(resolve_lang(session), "wa_login_error"), email)
 
 
 
@@ -560,7 +563,7 @@ def get():
 def get(site_slug: str, locale: str):
     site = recruitment_enterprise.public_career_site(site_slug, locale)
     if not site:
-        return Response("Careers site not found.", status_code=404)
+        return Response(t_app(current_lang(), "wa_careers_not_found"), status_code=404)
     site_view = {**site, "name": site.get("name") or site.get("brand_name"),
                  "brand_color": site.get("primary_color") or site.get("brand_color"),
                  "accent_color": site.get("accent_color"),
@@ -575,7 +578,7 @@ def get(site_slug: str, locale: str):
 def get(request, site_slug: str, locale: str, slug: str):
     job = recruitment_enterprise.public_distributed_job(site_slug, locale, slug)
     if not job:
-        return Response("This job is not available.", status_code=404)
+        return Response(t_app(current_lang(), "wa_job_unavailable"), status_code=404)
     path = f"/sites/{site_slug}/{locale}"
     job_path = path + f"/jobs/{slug}"
     recruitment_ecosystem.track_event(
@@ -593,7 +596,7 @@ def get():
 def get(request, slug: str):
     job = recruitment.public_job(slug)
     if not job:
-        return Response("This job is not available.", status_code=404)
+        return Response(t_app(current_lang(), "wa_job_unavailable"), status_code=404)
     recruitment_ecosystem.track_event(
         "job_view", job_id=job["job_id"], source=request.query_params.get("utm_source", ""),
         medium=request.query_params.get("utm_medium", ""))
@@ -658,7 +661,7 @@ async def _submit_public_application(request, public_slug: str, job: dict, *,
 async def post(request, slug: str):
     job = recruitment.public_job(slug)
     if not job:
-        return Response("This job is not accepting applications.", status_code=404)
+        return Response(t_app(current_lang(), "wa_not_accepting"), status_code=404)
     return await _submit_public_application(request, slug, job)
 
 
@@ -666,7 +669,7 @@ async def post(request, slug: str):
 async def post(request, site_slug: str, locale: str, slug: str):
     job = recruitment_enterprise.public_distributed_job(site_slug, locale, slug)
     if not job:
-        return Response("This job is not accepting applications.", status_code=404)
+        return Response(t_app(current_lang(), "wa_not_accepting"), status_code=404)
     path = f"/sites/{site_slug}/{locale}"
     job_path = path + f"/jobs/{slug}"
     return await _submit_public_application(
@@ -687,7 +690,7 @@ def _public_recruiting_shell(title: str, content, *, description: str = "", imag
 def get(token: str):
     candidate_id = recruitment_communications.authenticate_portal(token)
     if not candidate_id:
-        return Response("This candidate portal link is invalid or expired.", status_code=404)
+        return Response(t_app(current_lang(), "wa_portal_expired"), status_code=404)
     return _public_recruiting_shell(
         "Candidate portal",
         recruiting_platform.portal_page(recruitment_communications.portal_snapshot(candidate_id), token),
@@ -698,13 +701,13 @@ def get(token: str):
 async def post(token: str, request_id: int, request):
     candidate_id = recruitment_communications.authenticate_portal(token)
     if not candidate_id:
-        return Response("Invalid portal link.", status_code=404)
+        return Response(t_app(current_lang(), "wa_invalid_portal"), status_code=404)
     pending = db.one(
         "SELECT * FROM candidate_requests WHERE id=? AND candidate_id=? AND status='Open'",
         (request_id, candidate_id),
     )
     if not pending:
-        return Response("Request is not open.", status_code=404)
+        return Response(t_app(current_lang(), "wa_request_closed"), status_code=404)
     form = await request.form()
     payload = {"response": str(form.get("response") or "").strip(),
                "answers": {key: str(value) for key, value in form.items()
@@ -713,7 +716,7 @@ async def post(token: str, request_id: int, request):
     if upload is not None and getattr(upload, "filename", ""):
         data = await upload.read()
         if not data or len(data) > 8 * 1024 * 1024:
-            return Response("Documents must be non-empty and 8 MB or smaller.", status_code=400)
+            return Response(t_app(current_lang(), "wa_documents_invalid"), status_code=400)
         path = cv_extract.store_upload(upload.filename, data)
         text_content = cv_extract.extract_text(path) if cv_extract.supported(upload.filename) else ""
         document_id = talent.save_document(
@@ -724,7 +727,7 @@ async def post(token: str, request_id: int, request):
         payload["document_id"] = document_id
         payload["file_name"] = upload.filename
     if not payload["response"] and not payload["answers"] and not payload.get("document_id"):
-        return Response("Add a response or document.", status_code=400)
+        return Response(t_app(current_lang(), "wa_response_required"), status_code=400)
     recruitment_communications.respond_candidate_request(request_id, candidate_id, payload)
     return RedirectResponse(f"/portal/{token}", status_code=303)
 
@@ -733,7 +736,7 @@ async def post(token: str, request_id: int, request):
 def post(token: str, application_id: int):
     candidate_id = recruitment_communications.authenticate_portal(token)
     if not candidate_id:
-        return Response("Invalid portal link.", status_code=404)
+        return Response(t_app(current_lang(), "wa_invalid_portal"), status_code=404)
     recruitment_communications.withdraw_application(application_id, candidate_id)
     return RedirectResponse(f"/portal/{token}", status_code=303)
 
@@ -742,7 +745,7 @@ def post(token: str, application_id: int):
 def post(token: str, action: str = "", details: str = ""):
     candidate_id = recruitment_communications.authenticate_portal(token)
     if not candidate_id:
-        return Response("Invalid portal link.", status_code=404)
+        return Response(t_app(current_lang(), "wa_invalid_portal"), status_code=404)
     if action == "renew":
         recruitment_communications.renew_consent(candidate_id, proof={"source": "candidate-portal"})
     elif action == "withdraw":
@@ -764,7 +767,7 @@ def get(token: str):
 def post(token: str, starts_at: str = ""):
     try:
         booking = recruitment_ecosystem.book_slot(token, starts_at)
-        note = f"Booked for {booking['starts_at']}. A calendar invitation is on its way."
+        note = t_app(current_lang(), "wa_booked").format(starts_at=booking["starts_at"])
     except ValueError as exc:
         note = str(exc)
     return _public_recruiting_shell(
@@ -815,7 +818,7 @@ def get(token: str):
         """SELECT s.* FROM surveys s JOIN survey_invitations i ON i.survey_id=s.id
            WHERE i.token=? AND i.status='Sent'""", (token,))
     if not survey:
-        return Response("Survey not found or already completed.", status_code=404)
+        return Response(t_app(current_lang(), "wa_survey_missing"), status_code=404)
     return _public_recruiting_shell(survey["name"], recruiting_platform.survey_public_page(survey, token))
 
 
@@ -825,37 +828,37 @@ async def post(request, token: str):
         """SELECT s.* FROM surveys s JOIN survey_invitations i ON i.survey_id=s.id
            WHERE i.token=? AND i.status='Sent'""", (token,))
     if not survey:
-        return Response("Survey not found or already completed.", status_code=404)
+        return Response(t_app(current_lang(), "wa_survey_missing"), status_code=404)
     answers = dict(await request.form())
     scores = [float(value) for value in answers.values() if str(value).replace(".", "", 1).isdigit()]
     recruitment_communications.submit_survey(token, answers, score=scores[0] if scores else None)
-    return _public_recruiting_shell(survey["name"], Div(H1("Thank you."), P("Your feedback has been recorded."), cls="public-card"))
+    return _public_recruiting_shell(survey["name"], Div(H1(t_app(current_lang(), "wa_survey_thanks")), P(t_app(current_lang(), "wa_survey_recorded")), cls="public-card"))
 
 
 @rt("/references/{token}")
 def get(token: str):
     reference = db.one("SELECT * FROM reference_requests WHERE token=? AND status='Requested'", (token,))
     if not reference:
-        return Response("Reference request not found.", status_code=404)
+        return Response(t_app(current_lang(), "wa_reference_missing"), status_code=404)
     return _public_recruiting_shell(
-        "Reference request", Div(H1("Candidate reference"), P(f"Requested from {reference['referee_name']}"),
-        Form(Label("Would you recommend this candidate?"), Select(Option("Yes", value="yes"), Option("No", value="no"), name="recommend"),
-             Textarea(name="comment", placeholder="Your reference", required=True), Button("Submit", cls="btn primary"),
+        t_app(current_lang(), "wa_reference_request"), Div(H1(t_app(current_lang(), "wa_candidate_reference")), P(t_app(current_lang(), "wa_requested_from").format(name=reference["referee_name"])),
+        Form(Label(t_app(current_lang(), "wa_recommend")), Select(Option(t_app(current_lang(), "wa_yes"), value="yes"), Option(t_app(current_lang(), "wa_no"), value="no"), name="recommend"),
+             Textarea(name="comment", placeholder=t_app(current_lang(), "wa_your_reference"), required=True), Button(t_app(current_lang(), "wa_submit"), cls="btn primary"),
              method="post", action=f"/references/{token}"), cls="public-card"))
 
 
 @rt("/references/{token}")
 def post(token: str, recommend: str = "", comment: str = ""):
     if not recruiting_ops.complete_reference(token, {"recommend": recommend == "yes", "comment": comment}):
-        return Response("Reference request not found.", status_code=404)
-    return _public_recruiting_shell("Reference received", Div(H1("Thank you."), P("The hiring team has received your reference."), cls="public-card"))
+        return Response(t_app(current_lang(), "wa_reference_missing"), status_code=404)
+    return _public_recruiting_shell(t_app(current_lang(), "wa_reference_received"), Div(H1(t_app(current_lang(), "wa_survey_thanks")), P(t_app(current_lang(), "wa_hiring_received")), cls="public-card"))
 
 
 @rt("/video-interview/{token}")
 def get(token: str):
     invitation = db.one("SELECT * FROM video_interview_invitations WHERE token=? AND expires_at>=datetime('now')", (token,))
     if not invitation:
-        return Response("Video interview link is invalid or expired.", status_code=404)
+        return Response(t_app(current_lang(), "wa_video_expired"), status_code=404)
     template = db.one("SELECT * FROM video_interview_templates WHERE id=?", (invitation["template_id"],))
     return _public_recruiting_shell(template["name"], recruiting_platform.video_public_page(invitation, template, token))
 
@@ -869,7 +872,7 @@ async def post(token: str, request):
         data = await upload.read()
         content_type = getattr(upload, "content_type", "") or ""
         if not content_type.startswith("video/") or not data or len(data) > 250 * 1024 * 1024:
-            return Response("Upload a non-empty video no larger than 250 MB.", status_code=400)
+            return Response(t_app(current_lang(), "wa_video_upload_invalid"), status_code=400)
         root = Path(os.getenv("FASTHR_UPLOAD_DIR") or Path(__file__).parent / "data" / "uploads") / "video"
         root.mkdir(parents=True, exist_ok=True)
         suffix = Path(upload.filename).suffix.lower()[:10]
@@ -877,7 +880,7 @@ async def post(token: str, request):
         path.write_bytes(data)
         media_url = str(path)
     if not media_url:
-        return Response("Record or attach a video response.", status_code=400)
+        return Response(t_app(current_lang(), "wa_video_response_required"), status_code=400)
     recruitment_enterprise.submit_video_response(
         token, int(form.get("question_index") or 0), media_url, transcriber=_transcriber())
     return RedirectResponse(f"/video-interview/{token}", status_code=303)
@@ -886,7 +889,7 @@ async def post(token: str, request):
 @rt("/video-interview/{token}/complete")
 def post(token: str):
     recruitment_enterprise.complete_video_interview(token)
-    return _public_recruiting_shell("Interview complete", Div(H1("Interview complete."), P("Thank you for your time."), cls="public-card"))
+    return _public_recruiting_shell(t_app(current_lang(), "wa_interview_complete"), Div(H1(t_app(current_lang(), "wa_interview_complete")), P(t_app(current_lang(), "wa_thank_time")), cls="public-card"))
 
 
 @rt("/talent/video-responses/{response_id}/media")
@@ -896,12 +899,12 @@ def get(session, response_id: int):
         return denied
     response = db.one("SELECT media_url FROM video_responses WHERE id=?", (response_id,))
     if not response:
-        return Response("Video response not found.", status_code=404)
+        return Response(t_app(current_lang(), "wa_video_response_missing"), status_code=404)
     location = response["media_url"] or ""
     if location.startswith(("https://", "http://")):
         return RedirectResponse(location, status_code=302)
     if not location or not os.path.isfile(location):
-        return Response("Video file is unavailable.", status_code=404)
+        return Response(t_app(current_lang(), "wa_video_unavailable"), status_code=404)
     return FileResponse(location, filename=Path(location).name)
 
 
@@ -1047,7 +1050,7 @@ async def post(session, request):
                                    str(form.get("shift_date", "")), str(form.get("location_label", "")),
                                    str(form.get("notes", "")))
     except (TypeError, ValueError):
-        return Response("Invalid shift details", status_code=400)
+        return Response(t_app(current_lang(), "wa_invalid_shift"), status_code=400)
     return RedirectResponse("/shifts", status_code=303)
 
 
@@ -1177,7 +1180,7 @@ async def post(session, request):
                    str(form.get("source", "Web")), _punch_value(form, "lat"), _punch_value(form, "lng"),
                    _punch_value(form, "accuracy"), str(form.get("note", "")))
     except (TypeError, ValueError):
-        return Response("Invalid clock-in details", status_code=400)
+        return Response(t_app(current_lang(), "wa_invalid_clock_in"), status_code=400)
     return RedirectResponse("/timeclock", status_code=303)
 
 
@@ -1191,7 +1194,7 @@ async def post(session, request):
                     str(form.get("source", "Web")), _punch_value(form, "lat"), _punch_value(form, "lng"),
                     _punch_value(form, "accuracy"), str(form.get("note", "")))
     except (TypeError, ValueError):
-        return Response("Invalid clock-out details", status_code=400)
+        return Response(t_app(current_lang(), "wa_invalid_clock_out"), status_code=400)
     return RedirectResponse("/timeclock", status_code=303)
 
 
@@ -1290,7 +1293,79 @@ async def post(session, request):
 
 # ---------- recruiting platform phases 2-5 -------------------------------
 
+_PLATFORM_NOTE_KEYS = {
+    "Pipeline template saved.": "wa_pipeline_saved", "Task updated.": "wa_task_updated",
+    "Automatic talent pool populated.": "wa_talent_pool_populated", "Candidate view saved.": "wa_candidate_view_saved",
+    "Mailbox saved.": "wa_mailbox_saved", "Template saved.": "wa_template_saved", "Message queued.": "wa_message_queued",
+    "Automation saved.": "wa_automation_saved", "Survey created.": "wa_survey_created", "Retention policy saved.": "wa_retention_saved",
+    "Privacy request processed.": "wa_privacy_processed", "Availability saved.": "wa_availability_saved", "Scheduling link created.": "wa_scheduling_link",
+    "Campaign published.": "wa_campaign_published", "Page template saved.": "wa_page_template_saved", "Choose an asset file.": "wa_choose_asset",
+    "Media asset uploaded.": "wa_asset_uploaded", "No flagged terms.": "wa_no_flagged_terms", "Job not found.": "wa_job_not_found",
+    "Experiment started.": "wa_experiment_started", "Dashboard saved.": "wa_dashboard_saved", "Brand created.": "wa_brand_created",
+    "Careers site created.": "wa_careers_site_created", "Team created.": "wa_team_created", "Organization member added.": "wa_member_added",
+    "Identity provider configured.": "wa_idp_configured", "Access policy created.": "wa_access_policy_created", "Legal document saved.": "wa_legal_saved",
+    "AI screening profile saved.": "wa_legal_saved", "Job distributed to careers site.": "wa_job_distributed",
+    "Reviewed translation saved.": "wa_translation_saved", "Video interview template saved.": "wa_video_template_saved",
+    "Video message recorded.": "wa_video_recorded", "Support request opened.": "wa_support_opened", "Service plan saved.": "wa_service_plan_saved",
+}
+
+
 def _platform_redirect(section: str, note: str):
+    lang = current_lang()
+    key = _PLATFORM_NOTE_KEYS.get(note)
+    if key:
+        note = t_app(lang, key)
+    elif note.startswith("Created ") and "scorecard reminders" in note:
+        note = t_app(lang, "wa_scorecard_reminders").format(n=re.search(r"\d+", note).group())
+    elif note.startswith("Sent "):
+        match = re.search(r"Sent (\d+); (\d+) failed", note)
+        if match:
+            note = t_app(lang, "wa_sent_messages").format(sent=match.group(1), failed=match.group(2))
+    elif note.startswith("SCIM token (copy now): "):
+        note = t_app(lang, "wa_scim_token").format(token=note.rsplit(": ", 1)[-1])
+    elif note == "AI screening profile saved.":
+        note = t_app(lang, "wa_screening_profile_saved")
+    elif note.startswith("Imported "):
+        match = re.search(r"Imported (\d+); (\d+) failed", note)
+        if match:
+            note = t_app(lang, "wa_imported").format(n=match.group(1), failed=match.group(2))
+    elif note.startswith("Targeted offer queued for "):
+        match = re.search(r"for (\d+) candidates; (\d+) failed", note)
+        if match:
+            note = t_app(lang, "wa_targeted_offer").format(succeeded=match.group(1), failed=match.group(2))
+    elif note.startswith("Bulk action completed: "):
+        match = re.search(r"(\d+) succeeded, (\d+) failed", note)
+        if match:
+            note = t_app(lang, "wa_bulk_action").format(succeeded=match.group(1), failed=match.group(2))
+    elif note.startswith("Interview invitations queued: "):
+        match = re.search(r"(\d+) succeeded, (\d+) failed", note)
+        if match:
+            note = t_app(lang, "wa_interview_invitations").format(succeeded=match.group(1), failed=match.group(2))
+    elif note.startswith("Mailbox synced; "):
+        match = re.search(r"(\d+) messages imported", note)
+        if match:
+            note = t_app(lang, "wa_mailbox_synced").format(n=match.group(1))
+    elif note.startswith("Survey link created: "):
+        note = t_app(lang, "wa_survey_link").format(token=note.rsplit("/", 1)[-1])
+    elif note.startswith("Retention processed "):
+        match = re.search(r"(\d+) candidates", note)
+        if match:
+            note = t_app(lang, "wa_retention_processed").format(n=match.group(1))
+    elif note.startswith("Published to "):
+        match = re.search(r"Published to (\d+) boards", note)
+        if match:
+            note = t_app(lang, "wa_published_boards").format(n=match.group(1))
+    elif note.startswith("Replace '"):
+        note = "; ".join(t_app(lang, "wa_replace_term").format(term=match.group(1), replacement=match.group(2))
+                           for match in re.finditer(r"Replace '([^']+)' with '([^']+)'", note))
+    elif note.startswith("Webhook created. Copy its secret now: "):
+        note = t_app(lang, "wa_webhook_created").format(secret=note.rsplit(": ", 1)[-1])
+    elif note.startswith("Screening score: "):
+        total, summary = note[len("Screening score: "):].split(". ", 1)
+        note = t_app(lang, "wa_screening_score").format(total=total, summary=summary)
+    elif note.startswith("Video interview link: "):
+        note = t_app(lang, "wa_video_link").format(token=note.rsplit("/", 1)[-1])
+    return RedirectResponse(f"/talent/platform?section={section}&note={quote(note)}", status_code=303)
     return RedirectResponse(f"/talent/platform?section={section}&note={quote(note)}", status_code=303)
 
 
@@ -1317,7 +1392,7 @@ def get(session, job_id: int):
     if not _user(session):
         return RedirectResponse("/login", status_code=303)
     if not recruiting_ops.can_access_project(job_id, _user(session), _roles_for(session)):
-        return Response("You do not have access to this project.", status_code=403)
+        return Response(t_app(current_lang(), "wa_project_access"), status_code=403)
     return _guard(session, "platform", lambda: recruiting_platform.workflow_page(job_id, actor=_user(session)))
 
 
@@ -1423,7 +1498,7 @@ def post(session, approval_id: int, decision: str = "", note: str = ""):
     approval = db.one("SELECT entity_id FROM approvals WHERE id=?", (approval_id,))
     if not approval or not recruiting_ops.decide_approval(
         approval_id, decision, actor=_user(session), note=note):
-        return Response("Approval is unavailable.", status_code=403)
+        return Response(t_app(current_lang(), "wa_approval_unavailable"), status_code=403)
     return RedirectResponse(f"/talent/jobs/{approval['entity_id']}/workflow", status_code=303)
 
 
@@ -1611,7 +1686,7 @@ def post(session, cid: int):
     if denied:
         return denied
     token = recruitment_communications.issue_portal_token(cid, actor=_user(session))
-    return Response(f"Candidate portal link: /portal/{token}", media_type="text/plain")
+    return Response(t_app(current_lang(), "wa_candidate_portal_link").format(token=token), media_type="text/plain")
 
 
 @rt("/talent/candidates/{cid}/requests")
@@ -2172,7 +2247,7 @@ def post(session, app_id: int, stage: str = ""):
         return Response("Unauthorized", status_code=401)
     a = db.one("SELECT job_id FROM applications WHERE id=?", (app_id,))
     if not a:
-        return Response("No such application", status_code=404)
+        return Response(t_app(current_lang(), "wa_no_application"), status_code=404)
     talent.set_stage(app_id, stage, actor=_user(session))
     return ats.job_main(a["job_id"])
 
@@ -2183,9 +2258,9 @@ def post(session, cid: int, job_id: int = 0):
         return Response("Unauthorized", status_code=401)
     if job_id:
         talent.apply_to_job(cid, job_id, actor=_user(session))
-        return P("Added to the requisition. Reload to see it listed.", cls="flag",
+        return P(t_app(current_lang(), "wa_added_requisition"), cls="flag",
                  style="border-left-color:var(--accent);background:var(--accent-light);color:var(--accent-hover);")
-    return P("Pick a requisition first.", cls="flag")
+    return P(t_app(current_lang(), "wa_pick_requisition"), cls="flag")
 
 
 @rt("/talent/upload")
@@ -2196,13 +2271,13 @@ async def post(session, request):
     form = await request.form()
     upload = form.get("cv")
     if upload is None or not getattr(upload, "filename", ""):
-        return P("Choose a CV file to upload.", cls="flag")
+        return P(t_app(current_lang(), "wa_choose_cv"), cls="flag")
     if not cv_extract.supported(upload.filename):
         return P(f"{upload.filename} ei ole toetatud failivorming. Kasuta PDF-, DOCX-, TXT- või MD-faili.", cls="flag")
 
     data = await upload.read()
     if not data:
-        return P("That file is empty.", cls="flag")
+        return P(t_app(current_lang(), "wa_empty_file"), cls="flag")
 
     job_id = int(form.get("job_id") or 0) or None
     res = cv_extract.ingest_cv(file_name=upload.filename, data=data, job_id=job_id,
@@ -2727,7 +2802,7 @@ def post(session, provider: str, api_key: str = "", api_secret: str = "",
     integrations.save(provider, api_key=api_key.strip(), api_secret=api_secret.strip(),
                       account_ref=account_ref.strip(), auto_sync=bool(auto_sync),
                       actor=_user(session))
-    note = "Credentials saved."
+    note = t_app(current_lang(), "wa_credentials_saved")
     if test:
         note = integrations.test_connection(provider, actor=_user(session))["note"]
     return RedirectResponse(f"/settings/integrations/{provider}?note={quote(note)}",
@@ -2894,16 +2969,16 @@ def get(session, rid: int, kind: str):
     kind = kind.upper()
     period = db.scalar("SELECT period FROM pay_runs WHERE id=?", (rid,))
     if not period:
-        return Response("Pay run not found.", status_code=404)
+        return Response(t_app(current_lang(), "wa_pay_run_missing"), status_code=404)
     try:
         if kind == "TOR":
             payload, row_count = statutory.build_tor(period)
         elif kind == "TSD":
             payload, row_count, period = statutory.build_tsd(rid)
         else:
-            return Response("Unknown statutory export.", status_code=404)
+            return Response(t_app(current_lang(), "wa_unknown_export"), status_code=404)
     except ValueError:
-        return Response("Pay run not found.", status_code=404)
+        return Response(t_app(current_lang(), "wa_pay_run_missing"), status_code=404)
     file_name = f"{kind.lower()}-{period}.csv"
     statutory.record_export(kind, period, file_name, payload, row_count, _user(session))
     return Response(payload.encode("utf-8"), media_type="text/csv", headers={
@@ -2917,7 +2992,7 @@ def get(session, export_id: int):
         return RedirectResponse(f"/login?next=/payroll/exports/{export_id}", status_code=303)
     export = db.statutory_export(export_id)
     if not export:
-        return Response("Export not found.", status_code=404)
+        return Response(t_app(current_lang(), "wa_export_missing"), status_code=404)
     return Response(export["payload"].encode("utf-8"), media_type="text/csv", headers={
         "Content-Disposition": f"attachment; filename={export['file_name']}",
     })
@@ -2933,7 +3008,7 @@ async def post(session, request):
     try:
         run_id = db.create_pay_run(period, employee_ids)
     except ValueError:
-        return Response("Invalid pay period", status_code=400)
+        return Response(t_app(current_lang(), "wa_invalid_pay_period"), status_code=400)
     return RedirectResponse(f"/payroll/runs/{run_id}", status_code=303)
 
 
@@ -2956,7 +3031,7 @@ def post(session, rid: int):
     try:
         db.prepare_pay_run(rid)
     except ValueError:
-        return Response("Pay run not found.", status_code=404)
+        return Response(t_app(current_lang(), "wa_pay_run_missing"), status_code=404)
     return RedirectResponse(f"/payroll/runs/{rid}?saved=1", status_code=303)
 
 
@@ -2965,7 +3040,7 @@ def post(session, rid: int, advance_id: int = 0):
     if not _user(session):
         return RedirectResponse("/login", status_code=303)
     if not _roles_for(session) & {"admin", "hrbp", "accountant"}:
-        return Response("Payroll access is required.", status_code=403)
+        return Response(t_app(current_lang(), "wa_payroll_required"), status_code=403)
     db.offset_employee_advance(rid, advance_id)
     return RedirectResponse(f"/payroll/runs/{rid}", status_code=303)
 
@@ -2979,7 +3054,8 @@ def get(session, pid: int):
 
 @rt("/ai")
 def get(session):
-    body = (views._title("AI Assistant", "Chat lives in the right rail. Ask in plain English or use slash-commands."),
+    lang = resolve_lang(session)
+    body = (views._title(t_app(lang, "wa_ai_title"), t_app(lang, "wa_ai_subtitle")),
             Div(NotStr(
                 "<div class='card'><h3>What you can ask</h3><ul style='line-height:1.8;'>"
                 "<li>“Who's on leave today?”</li><li>“Which department is biggest?”</li>"
@@ -3000,21 +3076,22 @@ def healthz():
 
 @rt("/about")
 def get(session):
+    lang = resolve_lang(session)
     v = version.info()
     stamped = bool(v["commit"])
-    rows = [("Version", f"v{v['version']}"),
-            ("Commit", v["commit"] + (" (uncommitted changes)" if v["dirty"] else "")
+    rows = [(t_app(lang, "wa_version"), f"v{v['version']}"),
+            (t_app(lang, "wa_commit"), v["commit"] + (" (uncommitted changes)" if v["dirty"] else "")
              if v["commit"] else "unknown"),
-            ("Branch", v["branch"] or "unknown"),
-            ("Built", v["build_date"] or "unknown"),
-            ("Environment", ENV_LABEL),
-            ("Model provider", f"{os.getenv('MODEL_PROVIDER', 'xai')} · "
+            (t_app(lang, "wa_branch"), v["branch"] or "unknown"),
+            (t_app(lang, "wa_built"), v["build_date"] or "unknown"),
+            (t_app(lang, "wa_environment"), ENV_LABEL),
+            (t_app(lang, "wa_model_provider"), f"{os.getenv('MODEL_PROVIDER', 'xai')} · "
                                f"{os.getenv('MODEL_NAME', 'grok-4-1-fast-reasoning')}"),
-            ("Database", db.DB_PATH),
-            ("Migrations applied", str(db.scalar("SELECT COUNT(*) FROM schema_migrations") or 0))]
+            (t_app(lang, "wa_database"), db.DB_PATH),
+            (t_app(lang, "wa_migrations"), str(db.scalar("SELECT COUNT(*) FROM schema_migrations") or 0))]
     applied = db.rows("SELECT * FROM schema_migrations ORDER BY version")
     body = (
-        views._title("About this build", "What is running, and where it came from"),
+        views._title(t_app(lang, "wa_about_title"), t_app(lang, "wa_about_subtitle")),
         Div(NotStr("<div class='card'><div class='card-header'><h3>Build</h3></div>"
                    "<div class='kv'>"
                    + "".join(f"<span class='k'>{k}</span><span>{v_}</span>" for k, v_ in rows)

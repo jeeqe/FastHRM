@@ -1187,6 +1187,83 @@ APP_COPY["en"].update({
     "rp_save_response": "Save response", "rp_complete_interview": "Complete interview",
 })
 
+# Final app-shell and public-route copy owned by web_app.py.
+APP_COPY["et"].update({
+    "wa_signin_intro": "Logi sisse oma HR töökeskkonda", "wa_signin": "Logi sisse",
+    "wa_login_error": "E-post või parool on vale.",
+    "wa_pipeline_saved": "Toru mall on salvestatud.", "wa_invalid_stage": "Kehtetu etapp",
+    "wa_task_updated": "Ülesanne on uuendatud.", "wa_talent_pool_populated": "Automaatne talendikogum on täidetud.",
+    "wa_candidate_view_saved": "Kandidaadivaade on salvestatud.",
+    "wa_targeted_offer": "Pakkumine järjekorda pandud {succeeded} kandidaadile; {failed} ebaõnnestus.",
+    "wa_bulk_action": "Hulgitoiming lõpetatud: {succeeded} õnnestus, {failed} ebaõnnestus.",
+    "wa_interview_invitations": "Intervjuukutsed järjekorda pandud: {succeeded} õnnestus, {failed} ebaõnnestus.",
+    "wa_candidate_portal_link": "Kandidaadi portaali link: /portal/{token}",
+    "wa_mailbox_saved": "Postkast on salvestatud.", "wa_mailbox_synced": "Postkast sünkroonitud; {n} sõnumit imporditud.",
+    "wa_template_saved": "Mall on salvestatud.", "wa_message_queued": "Sõnum on järjekorda pandud.",
+    "wa_automation_saved": "Automaatika on salvestatud.", "wa_survey_created": "Küsitlus on loodud.",
+    "wa_survey_link": "Küsitluse link loodud: /survey/{token}", "wa_retention_saved": "Säilituspoliitika on salvestatud.",
+    "wa_retention_processed": "Säilitustoiming töötles {n} kandidaati.", "wa_privacy_processed": "Privaatsustaotlus on töödeldud.",
+    "wa_availability_saved": "Saadavus on salvestatud.", "wa_scheduling_link": "Ajakava link on loodud.",
+    "wa_published_boards": "Avaldatud {n} tahvlil.", "wa_campaign_published": "Kampaania on avaldatud.",
+    "wa_page_template_saved": "Lehemall on salvestatud.", "wa_choose_asset": "Vali varafail.",
+    "wa_asset_uploaded": "Meediavara on üles laaditud.", "wa_replace_term": "Asenda '{term}' sõnaga '{replacement}'",
+    "wa_no_flagged_terms": "Märgitud termineid pole.", "wa_job_not_found": "Tööd ei leitud.",
+    "wa_webhook_created": "Veebikonks on loodud. Kopeeri selle saladus kohe: {secret}",
+    "wa_experiment_started": "Eksperiment on alustatud.", "wa_dashboard_saved": "Töölaud on salvestatud.",
+    "wa_brand_created": "Bränd on loodud.", "wa_careers_site_created": "Karjäärisait on loodud.",
+    "wa_team_created": "Meeskond on loodud.", "wa_member_added": "Organisatsiooni liige on lisatud.",
+    "wa_idp_configured": "Identiteedipakkuja on seadistatud.", "wa_access_policy_created": "Ligipääsupoliitika on loodud.",
+    "wa_legal_saved": "Juriidiline dokument on salvestatud.", "wa_screening_score": "Sõelumise skoor: {total}. {summary}",
+    "wa_job_distributed": "Töö on karjäärisaidile levitatud.", "wa_translation_saved": "Ülevaadatud tõlge on salvestatud.",
+    "wa_video_template_saved": "Videointervjuu mall on salvestatud.", "wa_video_link": "Videointervjuu link: /video-interview/{token}",
+    "wa_video_recorded": "Videole sõnum on salvestatud.", "wa_support_opened": "Tugipäring on avatud.",
+    "wa_service_plan_saved": "Teenuseplaan on salvestatud.", "wa_credentials_saved": "Kasutajatunnused on salvestatud.",
+    "wa_added_requisition": "Lisatud värbamistaotlusele. Laadi uuesti, et seda loendis näha.", "wa_pick_requisition": "Vali esmalt värbamistaotlus.",
+    "wa_choose_cv": "Vali üleslaadimiseks CV-fail.", "wa_empty_file": "See fail on tühi.",
+    "wa_ai_title": "AI-assistent", "wa_ai_subtitle": "Vestlus asub parempoolses külgribas. Küsi tavakeeles või kasuta kaldkriipsukäske.",
+    "wa_about_title": "Selle järgu teave", "wa_about_subtitle": "Mis töötab ja kust see pärineb",
+    "wa_model_provider": "Mudelipakkuja", "wa_migrations": "Rakendatud migratsioonid", "wa_version": "Versioon",
+    "wa_commit": "Commit", "wa_branch": "Haru", "wa_built": "Koostatud", "wa_environment": "Keskkond", "wa_database": "Andmebaas",
+    "wa_survey_thanks": "Aitäh!", "wa_survey_recorded": "Sinu tagasiside on salvestatud.",
+    "wa_reference_request": "Viitetaotlus", "wa_candidate_reference": "Kandidaadi soovitus", "wa_requested_from": "Küsitud isikult {name}",
+    "wa_recommend": "Kas soovitad seda kandidaati?", "wa_yes": "Jah", "wa_no": "Ei", "wa_your_reference": "Sinu soovitus", "wa_submit": "Esita",
+    "wa_reference_received": "Soovitus on kätte saadud", "wa_hiring_received": "Värbamismeeskond on sinu soovituse kätte saanud.",
+    "wa_interview_complete": "Intervjuu on lõpetatud.", "wa_thank_time": "Tänan aja eest.", "wa_booked": "Broneeritud ajaks {starts_at}. Kalendrikutse on teel.",
+    "wa_careers_not_found": "Karjäärisaiti ei leitud.", "wa_job_unavailable": "See töö pole saadaval.", "wa_not_accepting": "See töö ei võta kandideerimisi vastu.",
+    "wa_portal_expired": "Kandidaadi portaali link pole kehtiv või on aegunud.", "wa_invalid_portal": "Portaali link pole kehtiv.", "wa_request_closed": "Päring pole avatud.",
+    "wa_documents_invalid": "Dokumendid peavad olema mittetühjad ja kuni 8 MB.", "wa_response_required": "Lisa vastus või dokument.",
+    "wa_survey_missing": "Küsitlust ei leitud või see on juba täidetud.", "wa_reference_missing": "Viitetaotlust ei leitud.",
+    "wa_video_expired": "Videointervjuu link pole kehtiv või on aegunud.", "wa_video_upload_invalid": "Laadi üles tühi video, mis ei ületa 250 MB.",
+    "wa_video_response_required": "Salvesta või lisa videovastus.", "wa_video_response_missing": "Videovastust ei leitud.", "wa_video_unavailable": "Videofail pole saadaval.",
+    "wa_no_application": "Sellist kandideerimist pole.", "wa_pay_run_missing": "Palgaperioodi käiku ei leitud.", "wa_unknown_export": "Tundmatu kohustuslik eksport.",
+    "wa_export_missing": "Eksporti ei leitud.", "wa_invalid_pay_period": "Kehtetu palgaperiood", "wa_payroll_required": "Palgaarvestuse ligipääs on nõutav.",
+    "wa_invalid_shift": "Vahetuse andmed pole kehtivad", "wa_invalid_clock_in": "Tööaja alustamise andmed pole kehtivad", "wa_invalid_clock_out": "Tööaja lõpetamise andmed pole kehtivad",
+    "wa_project_access": "Sul pole sellele projektile ligipääsu.", "wa_approval_unavailable": "Kinnitamine pole saadaval.",
+})
+APP_COPY["en"].update({
+    key: value for key, value in {
+        "wa_signin_intro": "Sign in to your HR workspace", "wa_signin": "Sign in", "wa_login_error": "Invalid email or password.",
+        "wa_pipeline_saved": "Pipeline template saved.", "wa_invalid_stage": "Invalid stage", "wa_task_updated": "Task updated.", "wa_talent_pool_populated": "Automatic talent pool populated.", "wa_candidate_view_saved": "Candidate view saved.",
+        "wa_targeted_offer": "Targeted offer queued for {succeeded} candidates; {failed} failed.", "wa_bulk_action": "Bulk action completed: {succeeded} succeeded, {failed} failed.", "wa_interview_invitations": "Interview invitations queued: {succeeded} succeeded, {failed} failed.", "wa_candidate_portal_link": "Candidate portal link: /portal/{token}",
+        "wa_mailbox_saved": "Mailbox saved.", "wa_mailbox_synced": "Mailbox synced; {n} messages imported.", "wa_template_saved": "Template saved.", "wa_message_queued": "Message queued.", "wa_automation_saved": "Automation saved.", "wa_survey_created": "Survey created.", "wa_survey_link": "Survey link created: /survey/{token}", "wa_retention_saved": "Retention policy saved.", "wa_retention_processed": "Retention processed {n} candidates.", "wa_privacy_processed": "Privacy request processed.", "wa_availability_saved": "Availability saved.", "wa_scheduling_link": "Scheduling link created.", "wa_published_boards": "Published to {n} boards.", "wa_campaign_published": "Campaign published.", "wa_page_template_saved": "Page template saved.", "wa_choose_asset": "Choose an asset file.", "wa_asset_uploaded": "Media asset uploaded.", "wa_replace_term": "Replace '{term}' with '{replacement}'", "wa_no_flagged_terms": "No flagged terms.", "wa_job_not_found": "Job not found.", "wa_webhook_created": "Webhook created. Copy its secret now: {secret}", "wa_experiment_started": "Experiment started.", "wa_dashboard_saved": "Dashboard saved.", "wa_brand_created": "Brand created.", "wa_careers_site_created": "Careers site created.", "wa_team_created": "Team created.", "wa_member_added": "Organization member added.", "wa_idp_configured": "Identity provider configured.", "wa_access_policy_created": "Access policy created.", "wa_legal_saved": "Legal document saved.", "wa_screening_score": "Screening score: {total}. {summary}", "wa_job_distributed": "Job distributed to careers site.", "wa_translation_saved": "Reviewed translation saved.", "wa_video_template_saved": "Video interview template saved.", "wa_video_link": "Video interview link: /video-interview/{token}", "wa_video_recorded": "Video message recorded.", "wa_support_opened": "Support request opened.", "wa_service_plan_saved": "Service plan saved.", "wa_credentials_saved": "Credentials saved.",
+        "wa_added_requisition": "Added to the requisition. Reload to see it listed.", "wa_pick_requisition": "Pick a requisition first.", "wa_choose_cv": "Choose a CV file to upload.", "wa_empty_file": "That file is empty.", "wa_ai_title": "AI Assistant", "wa_ai_subtitle": "Chat lives in the right rail. Ask in plain English or use slash-commands.", "wa_about_title": "About this build", "wa_about_subtitle": "What is running, and where it came from", "wa_model_provider": "Model provider", "wa_migrations": "Migrations applied", "wa_version": "Version", "wa_commit": "Commit", "wa_branch": "Branch", "wa_built": "Built", "wa_environment": "Environment", "wa_database": "Database", "wa_survey_thanks": "Thank you.", "wa_survey_recorded": "Your feedback has been recorded.", "wa_reference_request": "Reference request", "wa_candidate_reference": "Candidate reference", "wa_requested_from": "Requested from {name}", "wa_recommend": "Would you recommend this candidate?", "wa_yes": "Yes", "wa_no": "No", "wa_your_reference": "Your reference", "wa_submit": "Submit", "wa_reference_received": "Reference received", "wa_hiring_received": "The hiring team has received your reference.", "wa_interview_complete": "Interview complete.", "wa_thank_time": "Thank you for your time.", "wa_booked": "Booked for {starts_at}. A calendar invitation is on its way.", "wa_careers_not_found": "Careers site not found.", "wa_job_unavailable": "This job is not available.", "wa_not_accepting": "This job is not accepting applications.", "wa_portal_expired": "This candidate portal link is invalid or expired.", "wa_invalid_portal": "Invalid portal link.", "wa_request_closed": "Request is not open.", "wa_documents_invalid": "Documents must be non-empty and 8 MB or smaller.", "wa_response_required": "Add a response or document.", "wa_survey_missing": "Survey not found or already completed.", "wa_reference_missing": "Reference request not found.", "wa_video_expired": "Video interview link is invalid or expired.", "wa_video_upload_invalid": "Upload a non-empty video no larger than 250 MB.", "wa_video_response_required": "Record or attach a video response.", "wa_video_response_missing": "Video response not found.", "wa_video_unavailable": "Video file is unavailable.", "wa_no_application": "No such application", "wa_pay_run_missing": "Pay run not found.", "wa_unknown_export": "Unknown statutory export.", "wa_export_missing": "Export not found.", "wa_invalid_pay_period": "Invalid pay period", "wa_payroll_required": "Payroll access is required.", "wa_invalid_shift": "Invalid shift details", "wa_invalid_clock_in": "Invalid clock-in details", "wa_invalid_clock_out": "Invalid clock-out details", "wa_project_access": "You do not have access to this project.", "wa_approval_unavailable": "Approval is unavailable.",
+    }.items()
+})
+APP_COPY["et"].update({
+    "wa_scorecard_reminders": "Loodi {n} hindamislehe meeldetuletust.",
+    "wa_sent_messages": "Saadetud {sent}; {failed} ebaõnnestus.",
+    "wa_scim_token": "SCIM-i tunnus (kopeeri kohe): {token}",
+    "wa_screening_profile_saved": "AI-sõelumise profiil on salvestatud.",
+    "wa_imported": "Imporditud {n}; {failed} ebaõnnestus.",
+})
+APP_COPY["en"].update({
+    "wa_scorecard_reminders": "Created {n} scorecard reminders.",
+    "wa_sent_messages": "Sent {sent}; {failed} failed.",
+    "wa_scim_token": "SCIM token (copy now): {token}",
+    "wa_screening_profile_saved": "AI screening profile saved.",
+    "wa_imported": "Imported {n}; {failed} failed.",
+})
+
 
 def t_app(lang: str, key: str) -> str:
     """Return one authenticated-app chrome label."""
