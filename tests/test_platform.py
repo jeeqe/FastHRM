@@ -997,3 +997,35 @@ def test_lifecycle_performance_and_settings_pages_render_both_app_languages(fres
             assert needle in et
         for needle in en_needles:
             assert needle in en
+
+
+def test_ats_pages_render_both_app_languages(fresh_db):
+    from starlette.testclient import TestClient
+
+    import web_app
+
+    client = TestClient(web_app.app)
+    client.post("/login", data={"email": web_app.VALID_EMAIL,
+                                "password": web_app.VALID_PASSWORD})
+
+    estonian_pages = {
+        "/talent/jobs": "Ametikohad",
+        "/talent/candidates": "Kandidaadid",
+        "/talent/offers": "Pakkumised",
+        "/talent/analytics": "Värbamise analüütika",
+    }
+    english_pages = {
+        "/talent/jobs": "Requisitions",
+        "/talent/candidates": "Candidates",
+        "/talent/offers": "Offers",
+        "/talent/analytics": "Talent analytics",
+    }
+    for path, heading in estonian_pages.items():
+        assert heading in client.get(path).text
+    for path, heading in english_pages.items():
+        assert heading in client.get(f"{path}?lang=en").text
+
+    et_candidates = client.get("/talent/candidates?lang=et").text
+    en_candidates = client.get("/talent/candidates?lang=en").text
+    assert "Kandidaat" in et_candidates and "Laadi üles ja analüüsi" in et_candidates
+    assert "Candidate" in en_candidates and "Upload &amp; parse" in en_candidates

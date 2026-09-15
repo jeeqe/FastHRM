@@ -2,6 +2,17 @@
 
 Product changes are listed newest first. This file must remain synchronized with `docs/product_roadmap.md` under the rule documented there and in `AGENTS.md`.
 
+## 2026-09-15 — ATS recruiter pages in Estonian and English
+
+### Added
+
+- Migrated the ATS recruiter renderers to the shared request-context app i18n copy, with Estonian as the default and canonical pipeline, status, interview and CV extraction vocabulary preserved.
+- Added bilingual route coverage for jobs, candidates, offers and talent analytics, including table headers and upload actions.
+
+### Verification
+
+- Added `test_ats_pages_render_both_app_languages`; full suite verification is recorded with the pull request.
+
 ## 2026-09-14 — Lifecycle, performance and settings pages in Estonian and English
 
 ### Added
