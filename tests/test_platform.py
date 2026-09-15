@@ -5,6 +5,7 @@ import json
 import calendar
 
 import pytest
+from starlette.testclient import TestClient
 
 
 def test_recruiting_platform_chrome_is_bilingual(fresh_db):
@@ -28,6 +29,26 @@ def test_recruiting_platform_chrome_is_bilingual(fresh_db):
             reset_request_context(tokens)
     finally:
         pass
+
+
+def test_web_app_remainder_is_bilingual(fresh_db):
+    import web_app
+
+    client = TestClient(web_app.app)
+    for lang, sign_in, invalid_portal in (
+        ("et", "Logi sisse", "Kandidaadi portaali link pole kehtiv või on aegunud."),
+        ("en", "Sign in", "This candidate portal link is invalid or expired."),
+    ):
+        login = client.post(f"/login?lang={lang}", data={"email": "wrong@example.test", "password": "wrong"})
+        assert sign_in in login.text
+        assert ("E-post või parool on vale." if lang == "et" else "Invalid email or password.") in login.text
+
+        client.post("/login", data={"email": web_app.VALID_EMAIL, "password": web_app.VALID_PASSWORD}, follow_redirects=False)
+        redirect = client.post(f"/talent/pipelines?lang={lang}", data={"name": f"Test {lang}", "stages": "Screen,Interview"})
+        assert ("Etappide mall on salvestatud." if lang == "et" else "Pipeline template saved.") in redirect.text
+
+        error = client.get(f"/portal/not-a-real-token?lang={lang}")
+        assert invalid_portal in error.text
 
 
 def test_granular_rbac_defaults_and_admin_bypass(fresh_db):

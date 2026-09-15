@@ -2,6 +2,17 @@
 
 Product changes are listed newest first. This file must remain synchronized with `docs/product_roadmap.md` under the rule documented there and in `AGENTS.md`.
 
+## 2026-09-15 — Final app-shell localization
+
+### Added
+
+- Localized the remaining FastHR app-shell flash notes, sign-in card, AI/About pages, public recruiting pages, and admin-facing errors through `wa_` copy keys; Estonian remains the default and English is available through `?lang=en`.
+- Added bilingual route coverage for sign-in, a platform redirect, and an invalid candidate portal link.
+
+### Verification
+
+- Ran the full pytest suite and checked that every `web_app.py` translation key exists in both language dictionaries.
+
 ## 2026-09-15 — Recruiting platform localization
 
 ### Added
