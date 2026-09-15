@@ -1530,7 +1530,7 @@ def post(session, app_id: int, stage: str = "", drop_reason: str = "", drop_deta
         return Response("Forbidden", status_code=403)
     if not recruiting_ops.move_application(app_id, stage, actor=_user(session),
                                            drop_reason=drop_reason, drop_detail=drop_detail):
-        return Response("Invalid stage", status_code=400)
+        return Response(t_app(current_lang(), "wa_invalid_stage"), status_code=400)
     recruitment_communications.emit_event(
         "application.stage_changed", {"entity_type": "application", "entity_id": app_id,
         "application_id": app_id, "job_id": app["job_id"],

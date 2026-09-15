@@ -45,7 +45,7 @@ def test_web_app_remainder_is_bilingual(fresh_db):
 
         client.post("/login", data={"email": web_app.VALID_EMAIL, "password": web_app.VALID_PASSWORD}, follow_redirects=False)
         redirect = client.post(f"/talent/pipelines?lang={lang}", data={"name": f"Test {lang}", "stages": "Screen,Interview"})
-        assert ("Toru mall on salvestatud." if lang == "et" else "Pipeline template saved.") in redirect.text
+        assert ("Etappide mall on salvestatud." if lang == "et" else "Pipeline template saved.") in redirect.text
 
         error = client.get(f"/portal/not-a-real-token?lang={lang}")
         assert invalid_portal in error.text
