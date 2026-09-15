@@ -7,6 +7,29 @@ import calendar
 import pytest
 
 
+def test_recruiting_platform_chrome_is_bilingual(fresh_db):
+    from web import recruiting_platform
+    from web.i18n import reset_request_context, set_request_context
+
+    snapshot = {"candidate": {"first_name": "Ada"}, "applications": [],
+                "requests": [{"id": 1, "title": "Details", "request_type": "information",
+                              "status": "Open", "fields_json": "[]"}]}
+    try:
+        for lang, heading, button in (
+            ("et", "Värbamisplatvorm", "Esita"),
+            ("en", "Recruiting platform", "Submit"),
+        ):
+            tokens = set_request_context(lang, "/talent/platform")
+            platform = str(recruiting_platform.platform_page("operations", actor="admin@fasthr.example"))
+            portal = str(recruiting_platform.portal_page(snapshot, "token"))
+            assert heading in platform
+            assert recruiting_platform._c("rp_operations") in platform
+            assert button in portal
+            reset_request_context(tokens)
+    finally:
+        pass
+
+
 def test_granular_rbac_defaults_and_admin_bypass(fresh_db):
     from web.rbac import can, permissions_for
 
