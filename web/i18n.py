@@ -1142,6 +1142,51 @@ APP_COPY["en"].update({"ats_years_short": " yrs", "ats_years": "years", "ats_acc
 APP_COPY["et"].update({"ats_outstanding": "Suurepärane", "ats_strong": "Tugev", "ats_solid": "Kindel", "ats_mixed": "Ebaühtlane", "ats_weak": "Nõrk", "ats_interview_context": "{kind}-intervjuu ametikohale {job} · {interviewer}"})
 APP_COPY["en"].update({"ats_outstanding": "Outstanding", "ats_strong": "Strong", "ats_solid": "Solid", "ats_mixed": "Mixed", "ats_weak": "Weak", "ats_interview_context": "{kind} interview for {job} · {interviewer}"})
 
+# Recruiter-platform module copy. Stored statuses, stages, event kinds and
+# candidate-provided content remain canonical data and are not translated.
+APP_COPY["et"].update({
+    "rp_operations": "Operatsioonid", "rp_communications": "Suhtlus", "rp_scheduling": "Ajastamine",
+    "rp_marketing": "Turundus ja ühendused", "rp_analytics": "Analüütika", "rp_enterprise": "Ettevõte",
+    "rp_title": "Värbamisplatvorm", "rp_subtitle": "Kandidaadikogemus, värbamise töökorraldus ja ettevõtte juhtelemendid",
+    "rp_workflow_subtitle": "Lohista kandidaate etappide vahel; iga liikumine logitakse.",
+    "rp_back_platform": "← Värbamisplatvorm", "rp_hiring_manager": "Värbamise juhi töölaud",
+    "rp_hiring_manager_subtitle": "Loendis on ainult projektid, mida on sinuga sõnaselgelt jagatud",
+    "rp_internal_jobs": "Sisesed ametikohad", "rp_internal_jobs_subtitle": "Töötajatele avaldatud rollid",
+    "rp_submit": "Esita", "rp_additional_context": "Täiendav teave", "rp_supporting_document": "Toetusdokument",
+    "rp_welcome": "Tere, {name}", "rp_candidate": "kandidaat", "rp_applications": "Kandideerimised",
+    "rp_requests": "Taotlused", "rp_privacy": "Privaatsus", "rp_withdraw_application": "Tühista kandideerimine",
+    "rp_renew_consent": "Uuenda nõusolekut", "rp_withdraw_consent": "Tühista nõusolek",
+    "rp_request_export": "Taotle andmete eksporti", "rp_request_correction": "Taotle parandust",
+    "rp_dispute_processing": "Vaidlusta töötlemine", "rp_request_anonymisation": "Taotle anonümiseerimist",
+    "rp_request_deletion": "Taotle kustutamist", "rp_choose_interview_time": "Vali intervjuu aeg",
+    "rp_no_interview_times": "Praegu pole aegu saadaval. Palun võta värbamismeeskonnaga ühendust.",
+    "rp_recruitment_campaign": "Värbamiskampaania", "rp_view_open_role": "Vaata avatud rolli",
+    "rp_campaign_fallback": "Tutvu selle võimaluse ja meeskonnaga.", "rp_submit_feedback": "Esita tagasiside",
+    "rp_record_responses": "Salvesta vastused, kui oled valmis.", "rp_video_url": "Või kleebi turvaline video URL",
+    "rp_save_response": "Salvesta vastus", "rp_complete_interview": "Lõpeta intervjuu",
+})
+APP_COPY["en"].update({
+    "rp_operations": "Operations", "rp_communications": "Communications", "rp_scheduling": "Scheduling",
+    "rp_marketing": "Marketing & connectors", "rp_analytics": "Analytics", "rp_enterprise": "Enterprise",
+    "rp_title": "Recruiting platform", "rp_subtitle": "Candidate experience, recruiter operations, and enterprise controls",
+    "rp_workflow_subtitle": "Drag candidates between stages; every move is audited.",
+    "rp_back_platform": "← Recruiting platform", "rp_hiring_manager": "Hiring manager workspace",
+    "rp_hiring_manager_subtitle": "Only projects explicitly shared with you are listed",
+    "rp_internal_jobs": "Internal opportunities", "rp_internal_jobs_subtitle": "Roles published for employees",
+    "rp_submit": "Submit", "rp_additional_context": "Additional context", "rp_supporting_document": "Supporting document",
+    "rp_welcome": "Welcome, {name}", "rp_candidate": "candidate", "rp_applications": "Applications",
+    "rp_requests": "Requests", "rp_privacy": "Privacy", "rp_withdraw_application": "Withdraw application",
+    "rp_renew_consent": "Renew consent", "rp_withdraw_consent": "Withdraw consent",
+    "rp_request_export": "Request export", "rp_request_correction": "Request correction",
+    "rp_dispute_processing": "Dispute processing", "rp_request_anonymisation": "Request anonymisation",
+    "rp_request_deletion": "Request deletion", "rp_choose_interview_time": "Choose an interview time",
+    "rp_no_interview_times": "No times are currently available. Please contact the hiring team.",
+    "rp_recruitment_campaign": "Recruitment campaign", "rp_view_open_role": "View open role",
+    "rp_campaign_fallback": "Explore this opportunity and meet the team.", "rp_submit_feedback": "Submit feedback",
+    "rp_record_responses": "Record your responses when ready.", "rp_video_url": "Or paste a secure video URL",
+    "rp_save_response": "Save response", "rp_complete_interview": "Complete interview",
+})
+
 
 def t_app(lang: str, key: str) -> str:
     """Return one authenticated-app chrome label."""

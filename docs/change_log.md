@@ -2,6 +2,17 @@
 
 Product changes are listed newest first. This file must remain synchronized with `docs/product_roadmap.md` under the rule documented there and in `AGENTS.md`.
 
+## 2026-09-15 — Recruiting platform localization
+
+### Added
+
+- Localized recruiter-platform navigation and candidate-facing magic-link pages through the shared app i18n context, with Estonian as the default and English available through `?lang=en`.
+- Added `rp_` copy keys for both languages and bilingual rendering coverage.
+
+### Verification
+
+- Verified the platform translation key inventory and ran the full pytest suite.
+
 ## 2026-09-15 — ATS recruiter pages in Estonian and English
 
 ### Added

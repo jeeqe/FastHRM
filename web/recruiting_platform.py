@@ -17,13 +17,19 @@ import recruitment_enterprise as enterprise
 import recruiting_ops as ops
 import talent
 from web.views import _pill, _title
+from web.i18n import current_lang, t_app
+
+
+def _c(key: str, **values: object) -> str:
+    """Translate recruiter-platform chrome, formatting only display values."""
+    return t_app(current_lang(), key).format(**values)
 
 
 def _tabs(active: str):
     items = [
-        ("operations", "Operations"), ("communications", "Communications"),
-        ("scheduling", "Scheduling"), ("marketing", "Marketing & connectors"),
-        ("analytics", "Analytics"), ("enterprise", "Enterprise"),
+        ("operations", _c("rp_operations")), ("communications", _c("rp_communications")),
+        ("scheduling", _c("rp_scheduling")), ("marketing", _c("rp_marketing")),
+        ("analytics", _c("rp_analytics")), ("enterprise", _c("rp_enterprise")),
     ]
     return Div(*[A(label, href=f"/talent/platform?section={key}",
                    cls="active" if key == active else "") for key, label in items], cls="seg")
@@ -37,7 +43,7 @@ def platform_page(section: str, *, actor: str, note: str = ""):
     }
     active = section if section in renderers else "operations"
     return (
-        _title("Recruiting platform", "Candidate experience, recruiter operations, and enterprise controls"),
+        _title(_c("rp_title"), _c("rp_subtitle")),
         _tabs(active), P(note, cls="flag") if note else None, renderers[active](actor=actor),
     )
 
@@ -136,8 +142,8 @@ document.querySelectorAll('.pipeline-card').forEach(c=>c.addEventListener('drags
 document.querySelectorAll('.pipeline-drop').forEach(col=>{col.addEventListener('dragover',e=>e.preventDefault());col.addEventListener('drop',async e=>{e.preventDefault();let id=e.dataTransfer.getData('text/plain');let data={stage:col.dataset.stage};if(col.dataset.stage==='Rejected'){data.drop_reason=prompt('Drop reason')||'Not selected';data.drop_detail=prompt('Optional detail')||'';}await fetch(`/talent/applications/${id}/move`,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams(data)});location.reload();});});
 """))
     return (
-        _title(job["title"], "Drag candidates between stages; every move is audited",
-               A("← Recruiting platform", href="/talent/platform", cls="btn")),
+        _title(job["title"], _c("rp_workflow_subtitle"),
+               A(_c("rp_back_platform"), href="/talent/platform", cls="btn")),
         Div(Div(H3("Project controls"), _pill("Confidential" if project["confidential"] else "Shared"), cls="card-header"),
             Form(Input(name="category", value=project["category"], placeholder="Category"),
                  Select(*[Option(t["name"], value=str(t["id"]), selected=t["id"] == project["template_id"]) for t in ops.pipeline_templates()], name="template_id"),
@@ -578,7 +584,7 @@ def hiring_manager_page(email: str):
     surveys = db.rows(
         """SELECT i.*,s.name FROM survey_invitations i JOIN surveys s ON s.id=i.survey_id
            WHERE lower(i.recipient_email)=? ORDER BY i.id DESC""", (email.lower(),))
-    return (_title("Hiring manager workspace", "Only projects explicitly shared with you are listed"),
+    return (_title(_c("rp_hiring_manager"), _c("rp_hiring_manager_subtitle")),
             Div(*[Div(H3(p["title"]), P(f"{p['active_candidates']} active candidates"),
                       A("Open board", href=f"/talent/jobs/{p['job_id']}/workflow", cls="btn"), cls="card")
                   for p in projects] or [P("No projects have been shared with this account.", cls="card")]),
@@ -596,7 +602,7 @@ def hiring_manager_page(email: str):
 
 def internal_jobs_page(audience: str = "all"):
     jobs = ops.internal_jobs(audience=audience)
-    return (_title("Internal opportunities", "Roles published for employees"),
+    return (_title(_c("rp_internal_jobs"), _c("rp_internal_jobs_subtitle")),
             Div(*[Div(H3(job["title"]), P(f"{job['location'] or 'Flexible'} · {job['remote_policy'] or ''}"),
                       A("View requisition", href=f"/talent/jobs/{job['job_id']}", cls="btn"), cls="card")
                   for job in jobs] or [P("No internal opportunities are open.", cls="card")]))
@@ -614,39 +620,39 @@ def _candidate_request_form(item: dict, token: str):
             control = Input(type=field.get("type") or "text", name=key,
                             required=bool(field.get("required", True)), aria_label=label)
         controls.append(Div(Label(label), control, cls="field"))
-    return Form(*controls, Textarea(name="response", placeholder="Additional context"),
+    return Form(*controls, Textarea(name="response", placeholder=_c("rp_additional_context")),
                 Input(type="file", name="document", accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg",
-                      aria_label="Supporting document"),
-                Button("Submit", cls="btn"), method="post",
+                      aria_label=_c("rp_supporting_document")),
+                Button(_c("rp_submit"), cls="btn"), method="post",
                 action=f"/portal/{token}/requests/{item['id']}",
                 enctype="multipart/form-data")
 
 
 def portal_page(snapshot: dict, token: str, *, note: str = ""):
     c = snapshot["candidate"]
-    return Div(H1(f"Welcome, {c.get('first_name') or 'candidate'}"), P(note) if note else None,
-               H2("Applications"), *[Div(H3(a["title"]), _pill(a["stage"]), P(a["status"]),
-                    Form(Button("Withdraw application", cls="btn"), method="post",
+    return Div(H1(_c("rp_welcome", name=c.get("first_name") or _c("rp_candidate"))), P(note) if note else None,
+               H2(_c("rp_applications")), *[Div(H3(a["title"]), _pill(a["stage"]), P(a["status"]),
+                    Form(Button(_c("rp_withdraw_application"), cls="btn"), method="post",
                          action=f"/portal/{token}/applications/{a['id']}/withdraw"), cls="card") for a in snapshot["applications"]],
-               H2("Requests"), *[Div(H3(r["title"]), P(r["request_type"]),
+               H2(_c("rp_requests")), *[Div(H3(r["title"]), P(r["request_type"]),
                     _candidate_request_form(r, token), cls="card")
                                   for r in snapshot["requests"] if r["status"] == "Open"],
-               H2("Privacy"), Form(Button("Renew consent", name="action", value="renew", cls="btn"),
-                                    Button("Withdraw consent", name="action", value="withdraw", cls="btn"),
-                                    Button("Request export", name="action", value="export", cls="btn"),
-                                    Button("Request correction", name="action", value="correct", cls="btn"),
-                                    Button("Dispute processing", name="action", value="dispute", cls="btn"),
-                                    Button("Request anonymisation", name="action", value="anonymize", cls="btn"),
-                                    Button("Request deletion", name="action", value="delete", cls="btn"),
+               H2(_c("rp_privacy")), Form(Button(_c("rp_renew_consent"), name="action", value="renew", cls="btn"),
+                                    Button(_c("rp_withdraw_consent"), name="action", value="withdraw", cls="btn"),
+                                    Button(_c("rp_request_export"), name="action", value="export", cls="btn"),
+                                    Button(_c("rp_request_correction"), name="action", value="correct", cls="btn"),
+                                    Button(_c("rp_dispute_processing"), name="action", value="dispute", cls="btn"),
+                                    Button(_c("rp_request_anonymisation"), name="action", value="anonymize", cls="btn"),
+                                    Button(_c("rp_request_deletion"), name="action", value="delete", cls="btn"),
                                     Textarea(name="details", placeholder="Explain the correction or dispute"),
                                     method="post", action=f"/portal/{token}/privacy", cls="card"))
 
 
 def schedule_public_page(token: str, slots: list[dict], *, note: str = ""):
-    return Div(H1("Choose an interview time"), P(note) if note else None,
+    return Div(H1(_c("rp_choose_interview_time")), P(note) if note else None,
                *[Form(Button(f"{s['starts_at']} ({s['timezone']})", name="starts_at", value=s["starts_at"], cls="btn"),
                       method="post", action=f"/schedule/{token}", cls="slot") for s in slots] or
-               [P("No times are currently available. Please contact the hiring team.")], cls="public-card")
+               [P(_c("rp_no_interview_times"))], cls="public-card")
 
 
 def campaign_public_page(campaign: dict):
@@ -659,15 +665,15 @@ def campaign_public_page(campaign: dict):
     for section in sections:
         kind = section.get("type")
         if kind == "hero":
-            nodes.append(Section(Span("Recruitment campaign"),
+            nodes.append(Section(Span(_c("rp_recruitment_campaign")),
                                  Img(src=f"/marketing-assets/{campaign['asset']['id']}",
                                      alt=campaign["asset"].get("alt_text") or "") if campaign.get("asset") else None,
                                  H1(content.get("headline") or campaign["name"]), cls="campaign-hero"))
         elif kind == "apply":
-            nodes.append(Section(A("View open role", href=campaign.get("job_url") or "/",
+            nodes.append(Section(A(_c("rp_view_open_role"), href=campaign.get("job_url") or "/",
                                    cls="btn primary"), cls="campaign-apply"))
         else:
-            nodes.append(Section(P(content.get("body") or "Explore this opportunity and meet the team."),
+            nodes.append(Section(P(content.get("body") or _c("rp_campaign_fallback")),
                                  cls="campaign-content"))
     return Div(Style(f".campaign-public{{font-family:{font},sans-serif}}.campaign-public img{{max-width:100%;height:auto}}"),
                *nodes, cls="campaign-public")
@@ -679,17 +685,17 @@ def survey_public_page(survey: dict, token: str, *, note: str = ""):
                Form(*[Div(Label(q.get("label") or q.get("key")),
                            Input(type="number" if q.get("type") == "nps" else "text",
                                  name=q.get("key"), min="0", max="10", required=True)) for q in questions],
-                    Button("Submit feedback", cls="btn primary"), method="post", action=f"/survey/{token}"), cls="public-card")
+                    Button(_c("rp_submit_feedback"), cls="btn primary"), method="post", action=f"/survey/{token}"), cls="public-card")
 
 
 def video_public_page(invitation: dict, template: dict, token: str, *, note: str = ""):
     questions = json.loads(template["questions_json"])
-    return Div(H1(template["name"]), P(template.get("intro_text") or "Record your responses when ready."),
+    return Div(H1(template["name"]), P(template.get("intro_text") or _c("rp_record_responses")),
                P(note) if note else None,
                *[Form(H3(q.get("question") or f"Question {i + 1}"),
                       Input(name="media", type="file", accept="video/*", capture="user"),
-                      Input(name="media_url", type="url", placeholder="Or paste a secure video URL"),
-                      Input(type="hidden", name="question_index", value=str(i)), Button("Save response", cls="btn"),
+                      Input(name="media_url", type="url", placeholder=_c("rp_video_url")),
+                      Input(type="hidden", name="question_index", value=str(i)), Button(_c("rp_save_response"), cls="btn"),
                       method="post", action=f"/video-interview/{token}/response",
                       enctype="multipart/form-data", cls="card") for i, q in enumerate(questions)],
-               Form(Button("Complete interview", cls="btn primary"), method="post", action=f"/video-interview/{token}/complete"))
+               Form(Button(_c("rp_complete_interview"), cls="btn primary"), method="post", action=f"/video-interview/{token}/complete"))
